@@ -1,0 +1,9 @@
+{% if lists %}
+    <ul>
+    {% for list in lists %}
+        <li><a href="/linklist/{{ list.id }}/">{{ list.title }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No lists are available.</p>
+{% endif %}

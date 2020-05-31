@@ -1,0 +1,9 @@
+{% if links %}
+    <ul>
+    {% for link in links %}
+        <li><a href="{{ link.link }}">{{ link.link }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No links are available.</p>
+{% endif %}
