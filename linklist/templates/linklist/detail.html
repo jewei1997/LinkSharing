@@ -1,7 +1,7 @@
 {% if links %}
     <ul>
     {% for link in links %}
-        <li><a href="{{ link.link }}">{{ link.link }}</a></li>
+        <li><a href="{{ link.link }}">{{ link.title }}</a></li>
     {% endfor %}
     </ul>
 {% else %}
