@@ -1,0 +1,25 @@
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Subject: Password reset on 127.0.0.1:8000
+From: webmaster@localhost
+To: jeremy.t.wei@gmail.com
+Date: Sat, 06 Jun 2020 19:39:54 -0000
+Message-ID: <159147239427.26668.5857455643150814001@jeremy.weiC02YR11DLVDT>
+
+
+You're receiving this email because you requested a password reset for your user account at 127.0.0.1:8000.
+
+Please go to the following page and choose a new password:
+
+http://127.0.0.1:8000/users/reset/NA/5h4-c6add38ab190c76d6164/
+
+Your username, in case you’ve forgotten: jewei
+
+Thanks for using our site!
+
+The 127.0.0.1:8000 team
+
+
+
+-------------------------------------------------------------------------------
