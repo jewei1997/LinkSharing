@@ -2,7 +2,7 @@
 
 MVP:
  - [x] user login
- - [ ] see of list of all your lists
+ - [x] see of list of all your lists
  - [ ] make a new list of links, be able to add and remove from it
  - [ ] be able to share the list to share with friends
  - [ ] feedback box

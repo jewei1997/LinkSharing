@@ -6,18 +6,17 @@ from django.template import loader
 
 # Index view for list of link lists
 def index(request):
-    lists = LinkList.objects.all()
+    users_lists = request.user.linklist_set.all()
     template = loader.get_template('linklist/index.html')
     context = {
-            'lists': lists,
+            'lists': users_lists,
     }
     return HttpResponse(template.render(context, request))
 
 
 # Detail view for a list, which displays a list of links
 def detail(request, linklist_id):
-    # TODO: need to filter by linklist_id
-    links = Link.objects.all()
+    links = Link.objects.filter(linklist__id=linklist_id)
     print(links)
     template = loader.get_template('linklist/detail.html')
     context = {
