@@ -14,3 +14,8 @@ Future Features:
  - [ ] subscribe to list to get updates
  - [ ] see a preview of link like how messenger does
  - [ ] read/unread
+
+ 
+## Development
+
+To run tests and see coverage: `./run_tests.sh`
