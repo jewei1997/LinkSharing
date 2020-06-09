@@ -1,0 +1,16 @@
+asgiref==3.2.7
+attrs==19.3.0
+Django==3.0.7
+importlib-metadata==1.6.1
+more-itertools==8.3.0
+packaging==20.4
+pluggy==0.13.1
+py==1.8.1
+pyparsing==2.4.7
+pytest==5.4.3
+pytest-django==3.9.0
+pytz==2020.1
+six==1.15.0
+sqlparse==0.3.1
+wcwidth==0.2.4
+zipp==3.1.0
