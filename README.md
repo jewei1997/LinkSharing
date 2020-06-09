@@ -3,6 +3,7 @@
 MVP:
  - [x] user login
  - [x] see of list of all your lists
+ - [ ] make backend REST, use react for front end
  - [ ] make a new list of links, be able to add and remove from it
  - [ ] be able to share the list to share with friends
  - [ ] feedback box
@@ -18,4 +19,6 @@ Future Features:
  
 ## Development
 
-To run tests and see coverage: `./run_tests.sh`
+ - To install all dependencies: `pip install -r requirements.txt`
+ - To run tests and see coverage: `./run_tests.sh`
+ - To run server `python manage.py runserver`
