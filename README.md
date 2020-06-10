@@ -19,6 +19,11 @@ Future Features:
  
 ## Development
 
- - To install all dependencies: `pip install -r requirements.txt`
+ - Setup:
+```
+python3 -m venv env
+source env/bin/activate
+pip install -r requirements.txt
+```
  - To run tests and see coverage: `./run_tests.sh`
- - To run server `python manage.py runserver`
+ - To run server `python3 manage.py runserver`
