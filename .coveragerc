@@ -1,5 +1,5 @@
 [run]
-omit = */tests/*,*/tests.py,*/migrations/*,*/apps.py,*/admin.py,*/urls.py,*/wsgi.py,*/asgi.py,*/settings.py
+omit = */env/*,manage.py,*/test*,*/migrations/*,*/apps.py,*/admin.py,*/urls.py,*/wsgi.py,*/asgi.py,*/settings.py
 
 [report]
 exclude_lines =
