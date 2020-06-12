@@ -6,7 +6,7 @@ from django.template import loader
 
 # Index view for list of link lists
 def index(request):
-    users_lists = request.user.linklist_set.all()
+    users_lists = request.user.linklist_set.all() if request.user.is_authenticated else []
     template = loader.get_template('linklist/index.html')
     context = {
             'lists': users_lists,
@@ -16,7 +16,7 @@ def index(request):
 
 # Detail view for a list, which displays a list of links
 def detail(request, linklist_id):
-    links = Link.objects.filter(linklist__id=linklist_id)
+    links = Link.objects.filter(linklist__id=linklist_id) if request.user.is_authenticated else []
     template = loader.get_template('linklist/detail.html')
     context = {
             'links': links,

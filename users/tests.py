@@ -1,3 +1,7 @@
-from django.test import TestCase
+from users.models import CustomUser
 
-# Create your tests here.
+
+class TestUserModel:
+    def test_custom_user_str(self):
+        user = CustomUser(username="test")
+        assert user.__str__() == "test"
