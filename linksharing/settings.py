@@ -25,7 +25,7 @@ SECRET_KEY = '9-cveu$6bvg_((*r3o%3)ll5r5_i--=)kru##hlrmyvva1yfti'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
 
 LOGIN_REDIRECT_URL = 'index'
 LOGOUT_REDIRECT_URL = 'home'

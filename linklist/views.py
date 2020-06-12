@@ -17,7 +17,6 @@ def index(request):
 # Detail view for a list, which displays a list of links
 def detail(request, linklist_id):
     links = Link.objects.filter(linklist__id=linklist_id)
-    print(links)
     template = loader.get_template('linklist/detail.html')
     context = {
             'links': links,
