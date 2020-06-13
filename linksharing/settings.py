@@ -138,5 +138,5 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
 CORS_ORIGIN_ALLOW_ALL = False
 
 CORS_ORIGIN_WHITELIST = (
-       'localhost:3000',  # for frontend to query this REST django backend
+       'http://localhost:3000',  # for frontend to query this REST django backend
 )
