@@ -9,6 +9,17 @@ from users.serializers import CustomUserSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status, generics
+from rest_framework.views import APIView
+
+
+class LinkListsView(APIView):
+    """
+    Class-based view: List the list of links a user has
+    """
+    def get(self, request, format=None):
+        linklists = LinkList.objects.all()
+        serializer = LinkListSerializer(linklists, context={'request': request}, many=True)
+        return Response(serializer.data)
 
 
 @api_view(['GET', 'POST', 'DELETE'])
