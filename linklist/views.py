@@ -1,12 +1,14 @@
+from django.contrib.auth.models import CustomUser
 from django.http import HttpResponse
 from django.views.generic import ListView
 from linklist.models import Link, LinkList
 from django.template import loader
+from linklist.serializers import LinkListSerializer, LinkSerializer
+from users.serializers import CustomUserSerializer
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from rest_framework import status
-from linklist.serializers import LinkListSerializer, LinkSerializer
+from rest_framework import status, generics
 
 
 @api_view(['GET', 'POST', 'DELETE'])
@@ -49,3 +51,14 @@ def linklist(request, pk):
         link = Link.objects.get(pk=request.data['pk'])
         link.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# some User views, following the tutorial
+class UserList(generics.ListAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
