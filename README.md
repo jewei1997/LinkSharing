@@ -3,7 +3,7 @@
 MVP:
  - [x] user login
  - [x] see of list of all your lists
- - [ ] make backend REST
+ - [x] make backend REST
  - [ ] make frontend with React
  - [ ] make a new list of links, be able to add and remove from it
  - [ ] be able to share the list to share with friends
