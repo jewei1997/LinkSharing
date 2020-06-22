@@ -20,6 +20,7 @@ class LinkListsView(APIView):
 
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    # only show YOUR linklists
     def get(self, request, format=None):
         linklists = LinkList.objects.all()
         serializer = LinkListSerializer(linklists, context={'request': request}, many=True)
@@ -33,7 +34,7 @@ class LinkListsView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, format=None):
-        linklist = LinkList.objects.get(pk=request.data['pk'])
+        linklist = LinkList.objects.get(pk=request.data['pk']) # this is wrong
         linklist.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -61,8 +62,10 @@ class LinkListView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
-        link = Link.objects.get(pk=request.data['pk'])
-        link.delete()
+        linklist = LinkList.objects.get(pk=pk)
+        if linklist.owner != request.user:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        linklist.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
