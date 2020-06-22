@@ -8,7 +8,7 @@ class LinkListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LinkList
-        fields = ('pk', 'title', 'date_created', 'user', 'owner')
+        fields = ('pk', 'title', 'date_created', 'owner')
 
 
 class LinkSerializer(serializers.ModelSerializer):
