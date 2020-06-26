@@ -12,8 +12,10 @@ MVP:
 thats it! keep it simple
 
 Future Features:
- - [ ] comment section on the list of links and on each link itself
+ - [ ] import bookmarks from chrome
  - [ ] subscribe to list to get updates
+ - [ ] chrome extension
+ - [ ] comment section on the list of links and on each link itself
  - [ ] see a preview of link like how messenger does
  - [ ] read/unread
 
