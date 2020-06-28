@@ -1,5 +1,13 @@
 # LinkSharing
 
+Frontend TODOs:
+ - [ ] delete link
+ - [ ] ui shell to show list of lists
+ - [ ] create a sharable link for each list
+ - [ ] link preview using og-*
+ - [ ] actual login
+ - [ ] routing
+
 MVP:
  - [x] user login
  - [x] see of list of all your lists
@@ -8,6 +16,9 @@ MVP:
  - [ ] make a new list of links, be able to add and remove from it
  - [ ] be able to share the list to share with friends
  - [ ] feedback box
+ - [ ] Profit???
+ - [ ] Invest $$ into TSLA stock
+ - [ ] Buy a Roadster??
 
 thats it! keep it simple
 

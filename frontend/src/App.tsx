@@ -1,6 +1,8 @@
 import React from 'react'
 import fetch from 'isomorphic-unfetch'
 import { Base64 } from 'js-base64'
+//@ts-ignore
+import {default as dt} from "py-datetime";
 
 import {
   Button,
@@ -101,6 +103,8 @@ class App extends React.Component<
 
   private addNewLinkHandler = (e: any) => {
     e.preventDefault()
+    
+    const newLink = { ...this.state.newLink, date_added: dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), linklist: 20 }
 
     fetch('http://127.0.0.1:8000/linklist/20/', {
       headers: {
@@ -108,11 +112,11 @@ class App extends React.Component<
         'Content-Type': 'application/json'
       },
       method: 'POST',
-      body: JSON.stringify({ ...this.state.newLink, linklist: 20 })
+      body: JSON.stringify(newLink)
     }).then((r) => {
       if (r.status === 201) {
         const newLinks = this.state.links
-        newLinks.push(this.state.newLink as LinkType)
+        newLinks.push(newLink as LinkType)
 
         this.setState({
           display: AppDisplayModes.linkTable,
@@ -244,6 +248,12 @@ class App extends React.Component<
                                     <Link href={cell.value}>{cell.value}</Link>
                                   </TableCell>
                                 )
+                              case 'date_added':
+                                return (
+                                  <TableCell key={cell.id}>
+                                    {(cell.value as string).substring(0,10)} 
+                                  </TableCell>
+                                )
 
                               default:
                                 return (
@@ -289,18 +299,6 @@ class App extends React.Component<
                 placeholder="Placeholder text"
                 onChange={(e) => {
                   this.editAttributeHandler(e, LinkAttributes.link)
-                }}
-              />
-            </FormGroup>
-            <FormGroup legendText="">
-              <TextInput
-                // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
-                id="dateInput"
-                invalidText="Invalid error message."
-                labelText="Date"
-                placeholder="Placeholder text"
-                onChange={(e) => {
-                  this.editAttributeHandler(e, LinkAttributes.date_added)
                 }}
               />
             </FormGroup>
