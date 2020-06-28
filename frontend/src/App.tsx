@@ -50,10 +50,8 @@ class App extends React.Component<
     display: AppDisplayModes
     links: LinkType[]
     newLink?: LinkType
-    currentUser: {
-      user: string
-      password: string
-    }
+    user: string
+    password: string
     loginAttempt: boolean
   }
 > {
@@ -65,22 +63,14 @@ class App extends React.Component<
     this.state = {
       display: AppDisplayModes.loginForm,
       links: [],
-      currentUser: {
-        user: '',
-        password: ''
-      },
+      user: '',
+      password: '',
       loginAttempt: false
     }
   }
 
   private getListFromDB = () => {
-    const options = {
-      headers: {
-        Authorization: 'admin:123passwd123'
-      }
-    }
-
-    fetch('http://127.0.0.1:8000/linklist/20/', options)
+    fetch('http://127.0.0.1:8000/linklist/20/')
       .then((r) => r.json())
       .then((data) => {
         this.setState({
@@ -114,7 +104,7 @@ class App extends React.Component<
 
     fetch('http://127.0.0.1:8000/linklist/20/', {
       headers: {
-        Authorization: `Basic ${Base64.encode(`admin:123passwd123`)}`,
+        Authorization: `Basic ${Base64.encode(`${this.state.user}:${this.state.password}`)}`,
         'Content-Type': 'application/json'
       },
       method: 'POST',
@@ -139,12 +129,11 @@ class App extends React.Component<
     e.preventDefault()
 
     // TODO: Check database to see if correct user/password
-    if (
-      this.state.currentUser.user === 'admin' &&
-      this.state.currentUser.password === '123456'
-    ) {
+    if (true) {
       this.setState({
-        display: AppDisplayModes.linkTable
+        display: AppDisplayModes.linkTable,
+        user: 'admin',
+        password: '123passwd123'
       })
     } else {
       console.log('Incorrect password')
@@ -181,22 +170,22 @@ class App extends React.Component<
   }
 
   private editLoginHandler = (e: any, attribute: LoginAttributes) => {
-    const currentUser = this.state.currentUser
+    let {user, password} = this.state
 
     switch (attribute) {
       case LoginAttributes.user:
-        currentUser.user = e.target.value
+        user = e.target.value
 
         break
 
       case LoginAttributes.password:
-        currentUser.password = e.target.value
+        password = e.target.value
 
         break
     }
 
     this.setState({
-      currentUser
+      user, password
     })
   }
 
