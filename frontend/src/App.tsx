@@ -1,13 +1,30 @@
 import React from 'react'
 import fetch from 'isomorphic-unfetch'
+import { Base64 } from 'js-base64'
 
-import { Button, DataTable, Link, TableContainer, Table, TableBody, TableHead, TableRow, TableHeader, TableCell, Form, FormGroup, TextInput, TextArea } from 'carbon-components-react'
+import {
+  Button,
+  DataTable,
+  Link,
+  TableContainer,
+  Table,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableHeader,
+  TableCell,
+  Form,
+  FormGroup,
+  TextInput,
+  TextArea
+} from 'carbon-components-react'
 
 type LinkType = {
   pk: number
   title: string
   link: string
   date_added: string
+  linklist: number
 }
 
 enum AppDisplayModes {
@@ -19,7 +36,7 @@ enum AppDisplayModes {
 enum LinkAttributes {
   'title',
   'link',
-  'date_added',
+  'date_added'
 }
 
 enum LoginAttributes {
@@ -27,20 +44,23 @@ enum LoginAttributes {
   'password'
 }
 
-class App extends React.Component<{}, {
-  display: AppDisplayModes
-  links: LinkType[]
-  newLink?: LinkType
-  currentUser: {
-    user: string
-    password: string
+class App extends React.Component<
+  {},
+  {
+    display: AppDisplayModes
+    links: LinkType[]
+    newLink?: LinkType
+    currentUser: {
+      user: string
+      password: string
+    }
+    loginAttempt: boolean
   }
-  loginAttempt: boolean
-}> {
+> {
   constructor(props: any) {
     super(props)
 
-    this.getListFromDB();
+    this.getListFromDB()
 
     this.state = {
       display: AppDisplayModes.loginForm,
@@ -56,17 +76,17 @@ class App extends React.Component<{}, {
   private getListFromDB = () => {
     const options = {
       headers: {
-        "Authorization": "admin:123passwd123"
+        Authorization: 'admin:123passwd123'
       }
     }
 
     fetch('http://127.0.0.1:8000/linklist/20/', options)
-      .then(r => r.json())
-      .then(data => {
+      .then((r) => r.json())
+      .then((data) => {
         this.setState({
           links: data
         })
-      });
+      })
   }
 
   private displayTable = (e: any) => {
@@ -84,6 +104,7 @@ class App extends React.Component<{}, {
         title: '',
         link: '',
         date_added: '',
+        linklist: -1
       }
     })
   }
@@ -91,13 +112,26 @@ class App extends React.Component<{}, {
   private addNewLinkHandler = (e: any) => {
     e.preventDefault()
 
-    const newLinks = this.state.links
-    newLinks.push(this.state.newLink as LinkType)
+    fetch('http://127.0.0.1:8000/linklist/20/', {
+      headers: {
+        Authorization: `Basic ${Base64.encode(`admin:123passwd123`)}`,
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify({ ...this.state.newLink, linklist: 20 })
+    }).then((r) => {
+      if (r.status === 201) {
+        const newLinks = this.state.links
+        newLinks.push(this.state.newLink as LinkType)
 
-    this.setState({
-      display: AppDisplayModes.linkTable,
-      links: newLinks,
-      newLink: undefined
+        this.setState({
+          display: AppDisplayModes.linkTable,
+          links: newLinks,
+          newLink: undefined
+        })
+      } else {
+        console.log(r.status, r.statusText, r.json())
+      }
     })
   }
 
@@ -105,7 +139,10 @@ class App extends React.Component<{}, {
     e.preventDefault()
 
     // TODO: Check database to see if correct user/password
-    if (this.state.currentUser.user === 'admin' && this.state.currentUser.password === '123456') {
+    if (
+      this.state.currentUser.user === 'admin' &&
+      this.state.currentUser.password === '123456'
+    ) {
       this.setState({
         display: AppDisplayModes.linkTable
       })
@@ -171,7 +208,7 @@ class App extends React.Component<{}, {
       date_added: string
     }[] = []
 
-    this.state.links.forEach(link => {
+    this.state.links.forEach((link) => {
       rowData.push({ ...link, id: rowData.length.toString() })
     })
 
@@ -193,14 +230,14 @@ class App extends React.Component<{}, {
                 {
                   header: 'Date Added',
                   key: 'date_added'
-                },
+                }
               ]}
               render={({ rows, headers, getHeaderProps }) => (
                 <TableContainer title="DataTable">
                   <Table>
                     <TableHead>
                       <TableRow>
-                        {headers.map(header => (
+                        {headers.map((header) => (
                           <TableHeader {...getHeaderProps({ header })}>
                             {header.header}
                           </TableHeader>
@@ -208,9 +245,9 @@ class App extends React.Component<{}, {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {rows.map(row => (
+                      {rows.map((row) => (
                         <TableRow key={row.id}>
-                          {row.cells.map(cell => {
+                          {row.cells.map((cell) => {
                             switch (cell.info.header) {
                               case 'link':
                                 return (
@@ -220,14 +257,20 @@ class App extends React.Component<{}, {
                                 )
 
                               default:
-                                return <TableCell key={cell.id}>{cell.value}</TableCell>
+                                return (
+                                  <TableCell key={cell.id}>
+                                    {cell.value}
+                                  </TableCell>
+                                )
                             }
                           })}
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
-                </TableContainer>)} />
+                </TableContainer>
+              )}
+            />
 
             <Button onClick={this.displayLinkForm}>Add new link</Button>
           </div>
@@ -236,67 +279,67 @@ class App extends React.Component<{}, {
       case AppDisplayModes.linkForm:
         return (
           <Form onSubmit={this.addNewLinkHandler}>
-            <FormGroup legendText=''>
+            <FormGroup legendText="">
               <TextInput
                 // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
                 id="titleInput"
                 invalidText="Invalid error message."
                 labelText="Title"
                 placeholder="Placeholder text"
-                onChange={(e) => { this.editAttributeHandler(e, LinkAttributes.title) }}
+                onChange={(e) => {
+                  this.editAttributeHandler(e, LinkAttributes.title)
+                }}
               />
             </FormGroup>
-            <FormGroup legendText=''>
+            <FormGroup legendText="">
               <TextInput
                 // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
                 id="linkInput"
                 invalidText="Invalid error message."
                 labelText="Link"
                 placeholder="Placeholder text"
-                onChange={(e) => { this.editAttributeHandler(e, LinkAttributes.link) }}
+                onChange={(e) => {
+                  this.editAttributeHandler(e, LinkAttributes.link)
+                }}
               />
             </FormGroup>
-            <FormGroup legendText=''>
+            <FormGroup legendText="">
               <TextInput
                 // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
                 id="dateInput"
                 invalidText="Invalid error message."
                 labelText="Date"
                 placeholder="Placeholder text"
-                onChange={(e) => { this.editAttributeHandler(e, LinkAttributes.date_added) }}
+                onChange={(e) => {
+                  this.editAttributeHandler(e, LinkAttributes.date_added)
+                }}
               />
             </FormGroup>
-            <Button
-              kind="primary"
-              tabIndex={0}
-              type="submit"
-            >
+            <Button kind="primary" tabIndex={0} type="submit">
               Submit
-          </Button>
-            <Button
-              onClick={this.displayTable}
-              kind="primary"
-              tabIndex={0}
-            >
+            </Button>
+            <Button onClick={this.displayTable} kind="primary" tabIndex={0}>
               Back
-          </Button>
+            </Button>
           </Form>
         )
 
       case AppDisplayModes.loginForm:
         return (
           <Form onSubmit={this.loginHandler}>
-            <FormGroup legendText=''>
+            <FormGroup legendText="">
               <TextInput
                 // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
                 id="linkInput"
                 invalidText="Invalid error message."
                 labelText="User"
                 placeholder="Placeholder text"
-                onChange={(e) => { this.editLoginHandler(e, LoginAttributes.user) }}
+                onChange={(e) => {
+                  this.editLoginHandler(e, LoginAttributes.user)
+                }}
               />
             </FormGroup>
-            <FormGroup legendText=''>
+            <FormGroup legendText="">
               <TextInput
                 // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
                 id="dateInput"
@@ -304,20 +347,18 @@ class App extends React.Component<{}, {
                 invalidText="Incorrect password"
                 labelText="Password"
                 placeholder="Placeholder text"
-                onChange={(e) => { this.editLoginHandler(e, LoginAttributes.password) }}
+                onChange={(e) => {
+                  this.editLoginHandler(e, LoginAttributes.password)
+                }}
               />
             </FormGroup>
-            <Button
-              kind="primary"
-              tabIndex={0}
-              type="submit"
-            >
+            <Button kind="primary" tabIndex={0} type="submit">
               Submit
-          </Button>
+            </Button>
           </Form>
         )
     }
   }
 }
 
-export default App;
+export default App
