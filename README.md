@@ -1,16 +1,20 @@
 # LinkSharing
 
 Frontend TODOs:
- - [ ] delete link
+ - [x] delete link
  - [ ] ui shell to show list of lists
+ - [ ] create, name, delete lists
  - [ ] create a sharable link for each list
  - [ ] link preview using og-*
  - [ ] actual login
  - [ ] routing
+ - [ ] cool logo
 
  Stretch goals
  - [ ] hover over tint delete link button
  - [ ] delete list should not use body, should use query string or path param
+ - [ ] dark mode
+ - [ ] pipy the pied piper
 
 MVP:
  - [x] user login

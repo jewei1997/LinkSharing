@@ -130,7 +130,7 @@ class App extends React.Component<
       method: 'POST',
       body: JSON.stringify(newLink)
     }).then((r) => {
-      if (r.status === 201) {
+      if (200 <= r.status && r.status < 300) {
         const newLinks = this.state.links
         newLinks.push(newLink as LinkType)
 
@@ -146,15 +146,24 @@ class App extends React.Component<
   }
 
   private deleteLinkHander = (e: any, pk: number) => {
-    console.log('pk', pk)
-    fetch('http://127.0.0.1:8000/linklist/20', {
+    fetch('http://127.0.0.1:8000/linklist/20/', {
       headers: {
         Authorization: `Basic ${Base64.encode(`${this.state.user}:${this.state.password}`)}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       method: 'DELETE',
       body: JSON.stringify({ pk })
     }).then(r => {
+      if (200 <= r.status && r.status < 300) {
+        const newLinks = this.state.links
+        const newLinksFiltered = newLinks.filter(link => link.pk !== pk)
+
+        this.setState({
+          display: AppDisplayModes.linkTable,
+          links: newLinksFiltered,
+          newLink: undefined
+        })
+      }
       console.log('Delete link', r.status, r.statusText)
     })
   }
