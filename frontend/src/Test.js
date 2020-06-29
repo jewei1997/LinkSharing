@@ -39,12 +39,13 @@ const options = {
 
 
 const data = {
-  pk: 1
+  pk: 7
 }
 
 fetch('http://127.0.0.1:8000/linklist/20', {
   headers: {
-    Authorization: `Basic ${Base64.encode(`admin:123passwd123`)}`
+    Authorization: `Basic ${Base64.encode(`admin:123passwd123`)}`,
+    "Content-Type": "application/json"
   },
   method: 'DELETE',
   body: JSON.stringify(data)

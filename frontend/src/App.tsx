@@ -40,6 +40,11 @@ type LinkType = {
   linklist: number
 }
 
+type RowData = LinkType & {
+    id: string;
+}
+
+
 enum AppDisplayModes {
   'linkTable',
   'linkForm',
@@ -135,8 +140,22 @@ class App extends React.Component<
           newLink: undefined
         })
       } else {
-        console.log(r.status, r.statusText, r.json())
+        console.log('Add link error', r.status, r.statusText)
       }
+    })
+  }
+
+  private deleteLinkHander = (e: any, pk: number) => {
+    console.log('pk', pk)
+    fetch('http://127.0.0.1:8000/linklist/20', {
+      headers: {
+        Authorization: `Basic ${Base64.encode(`${this.state.user}:${this.state.password}`)}`,
+        "Content-Type": "application/json"
+      },
+      method: 'DELETE',
+      body: JSON.stringify({ pk })
+    }).then(r => {
+      console.log('Delete link', r.status, r.statusText)
     })
   }
 
@@ -205,12 +224,7 @@ class App extends React.Component<
   }
 
   render() {
-    const rowData: {
-      id: string
-      title: string
-      link: string
-      date_added: string
-    }[] = []
+    const rowData: RowData[] = []
 
     this.state.links.forEach((link) => {
       rowData.push({ ...link, id: rowData.length.toString() })
@@ -269,6 +283,10 @@ class App extends React.Component<
                           {
                             header: 'Date Added',
                             key: 'date_added'
+                          },
+                          {
+                            header: '',
+                            key: 'deleteLink'
                           }
                         ]}
                         render={({ rows, headers, getHeaderProps }) => (
@@ -300,6 +318,20 @@ class App extends React.Component<
                                               {(cell.value as string).substring(0,10)} 
                                             </TableCell>
                                           )
+
+                                        case 'deleteLink':
+                                          const row = rowData.find(row => row.id === cell.id.split(':')[0]) as RowData
+
+                                          return (
+                                            <TableCell key={cell.id}>
+                                              <div
+                                                className="clickableicon"
+                                                onClick={(e) => this.deleteLinkHander(e, row.pk)}
+                                              >
+                                                <TrashCan20 />
+                                              </div>
+                                            </TableCell>
+                                          )
           
                                         default:
                                           return (
@@ -309,16 +341,6 @@ class App extends React.Component<
                                           )
                                       }
                                     })}
-          
-          
-                                    <TableCell key='deleteLink'>
-                                      <div
-                                        className="clickableicon"
-                                        onClick={() => console.log('delete link')}
-                                      >
-                                        <TrashCan20 />
-                                      </div>
-                                    </TableCell>
                                   </TableRow>
                                 ))}
           

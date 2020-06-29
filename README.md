@@ -10,6 +10,7 @@ Frontend TODOs:
 
  Stretch goals
  - [ ] hover over tint delete link button
+ - [ ] delete list should not use body, should use query string or path param
 
 MVP:
  - [x] user login
