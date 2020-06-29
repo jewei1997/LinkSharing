@@ -62,10 +62,10 @@ class LinkListView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk, format=None):
-        linklist = LinkList.objects.get(pk=pk)
-        if linklist.owner != request.user:
+        link = Link.objects.get(pk=request.data['pk'])
+        if link.linklist.owner != request.user or link.linklist.pk != pk:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        linklist.delete()
+        link.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
