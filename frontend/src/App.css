@@ -36,3 +36,12 @@
     transform: rotate(360deg);
   }
 }
+
+.clickableicon {
+  cursor: pointer;
+  fill: #C0C0C0;
+}
+
+.clickableicon:hover {
+  fill:  #C0C0C0;
+}

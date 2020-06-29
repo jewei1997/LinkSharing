@@ -8,6 +8,9 @@ Frontend TODOs:
  - [ ] actual login
  - [ ] routing
 
+ Stretch goals
+ - [ ] hover over tint delete link button
+
 MVP:
  - [x] user login
  - [x] see of list of all your lists

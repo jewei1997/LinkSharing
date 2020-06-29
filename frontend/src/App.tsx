@@ -1,11 +1,16 @@
 import React from 'react'
 import fetch from 'isomorphic-unfetch'
 import { Base64 } from 'js-base64'
-//@ts-ignore
-import {default as dt} from "py-datetime";
+
+// @ts-ignore
+import { TrashCan20, Search20, Notification20, AppSwitcher20 } from '@carbon/icons-react'
+
+// @ts-ignore
+import { default as dt } from "py-datetime";
 
 import {
   Button,
+  Content,
   DataTable,
   Link,
   TableContainer,
@@ -18,7 +23,13 @@ import {
   Form,
   FormGroup,
   TextInput,
-  TextArea
+  HeaderName,
+  HeaderGlobalBar,
+  HeaderGlobalAction,
+  Header,
+  SideNav,
+  SideNavItems,
+  SideNavLink,
 } from 'carbon-components-react'
 
 type LinkType = {
@@ -205,146 +216,198 @@ class App extends React.Component<
       rowData.push({ ...link, id: rowData.length.toString() })
     })
 
-    switch (this.state.display) {
-      case AppDisplayModes.linkTable:
-        return (
-          <div>
-            <DataTable
-              rows={rowData}
-              headers={[
-                {
-                  header: 'Title',
-                  key: 'title'
-                },
-                {
-                  header: 'Link',
-                  key: 'link'
-                },
-                {
-                  header: 'Date Added',
-                  key: 'date_added'
-                }
-              ]}
-              render={({ rows, headers, getHeaderProps }) => (
-                <TableContainer title="DataTable">
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        {headers.map((header) => (
-                          <TableHeader {...getHeaderProps({ header })}>
-                            {header.header}
-                          </TableHeader>
-                        ))}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {rows.map((row) => (
-                        <TableRow key={row.id}>
-                          {row.cells.map((cell) => {
-                            switch (cell.info.header) {
-                              case 'link':
-                                return (
-                                  <TableCell key={cell.id}>
-                                    <Link href={cell.value}>{cell.value}</Link>
-                                  </TableCell>
-                                )
-                              case 'date_added':
-                                return (
-                                  <TableCell key={cell.id}>
-                                    {(cell.value as string).substring(0,10)} 
-                                  </TableCell>
-                                )
-
-                              default:
-                                return (
-                                  <TableCell key={cell.id}>
-                                    {cell.value}
-                                  </TableCell>
-                                )
-                            }
-                          })}
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
-            />
-
-            <Button onClick={this.displayLinkForm}>Add new link</Button>
-          </div>
-        )
-
-      case AppDisplayModes.linkForm:
-        return (
-          <Form onSubmit={this.addNewLinkHandler}>
-            <FormGroup legendText="">
-              <TextInput
-                // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
-                id="titleInput"
-                invalidText="Invalid error message."
-                labelText="Title"
-                placeholder="Placeholder text"
-                onChange={(e) => {
-                  this.editAttributeHandler(e, LinkAttributes.title)
-                }}
-              />
-            </FormGroup>
-            <FormGroup legendText="">
-              <TextInput
-                // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
-                id="linkInput"
-                invalidText="Invalid error message."
-                labelText="Link"
-                placeholder="Placeholder text"
-                onChange={(e) => {
-                  this.editAttributeHandler(e, LinkAttributes.link)
-                }}
-              />
-            </FormGroup>
-            <Button kind="primary" tabIndex={0} type="submit">
-              Submit
-            </Button>
-            <Button onClick={this.displayTable} kind="primary" tabIndex={0}>
-              Back
-            </Button>
-          </Form>
-        )
-
-      case AppDisplayModes.loginForm:
-        return (
-          <Form onSubmit={this.loginHandler}>
-            <FormGroup legendText="">
-              <TextInput
-                // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
-                id="linkInput"
-                invalidText="Invalid error message."
-                labelText="User"
-                placeholder="Placeholder text"
-                onChange={(e) => {
-                  this.editLoginHandler(e, LoginAttributes.user)
-                }}
-              />
-            </FormGroup>
-            <FormGroup legendText="">
-              <TextInput
-                // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
-                id="dateInput"
-                invalid={this.state.loginAttempt}
-                invalidText="Incorrect password"
-                labelText="Password"
-                placeholder="Placeholder text"
-                onChange={(e) => {
-                  this.editLoginHandler(e, LoginAttributes.password)
-                }}
-              />
-            </FormGroup>
-            <Button kind="primary" tabIndex={0} type="submit">
-              Submit
-            </Button>
-          </Form>
-        )
-    }
+    return (
+      <div>
+        <Header aria-label="IBM Platform Name">
+          <HeaderName href="#" prefix="IBM">
+            [Platform]
+          </HeaderName>
+          <HeaderGlobalBar>
+            <HeaderGlobalAction aria-label="Search" onClick={() => {}}>
+              <Search20 />
+            </HeaderGlobalAction>
+            <HeaderGlobalAction aria-label="Notifications" onClick={() => {}}>
+              <Notification20 />
+            </HeaderGlobalAction>
+            <HeaderGlobalAction aria-label="App Switcher" onClick={() => {}}>
+              <AppSwitcher20 />
+            </HeaderGlobalAction>
+          </HeaderGlobalBar>
+        </Header>
+        <SideNav
+          isFixedNav
+          expanded={true}
+          isChildOfHeader={false}
+          aria-label="Side navigation"
+        >
+          <SideNavItems>
+            <SideNavLink>L0 link</SideNavLink>
+            <SideNavLink>L0 link</SideNavLink>
+            <SideNavLink>L0 link</SideNavLink>
+            <SideNavLink>L0 link</SideNavLink>
+            <SideNavLink>L0 link</SideNavLink>
+          </SideNavItems>
+        </SideNav>
+        <Content>
+          {
+            (() => {
+              switch (this.state.display) {
+                case AppDisplayModes.linkTable:
+                  return (
+                    <div>
+                      <DataTable
+                        rows={rowData}
+                        headers={[
+                          {
+                            header: 'Title',
+                            key: 'title'
+                          },
+                          {
+                            header: 'Link',
+                            key: 'link'
+                          },
+                          {
+                            header: 'Date Added',
+                            key: 'date_added'
+                          }
+                        ]}
+                        render={({ rows, headers, getHeaderProps }) => (
+                          <TableContainer title="DataTable">
+                            <Table>
+                              <TableHead>
+                                <TableRow>
+                                  {headers.map((header) => (
+                                    <TableHeader {...getHeaderProps({ header })}>
+                                      {header.header}
+                                    </TableHeader>
+                                  ))}
+                                </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                {rows.map((row) => (
+                                  <TableRow key={row.id}>
+                                    {row.cells.map((cell) => {
+                                      switch (cell.info.header) {
+                                        case 'link':
+                                          return (
+                                            <TableCell key={cell.id}>
+                                              <Link href={cell.value}>{cell.value}</Link>
+                                            </TableCell>
+                                          )
+                                        case 'date_added':
+                                          return (
+                                            <TableCell key={cell.id}>
+                                              {(cell.value as string).substring(0,10)} 
+                                            </TableCell>
+                                          )
+          
+                                        default:
+                                          return (
+                                            <TableCell key={cell.id}>
+                                              {cell.value}
+                                            </TableCell>
+                                          )
+                                      }
+                                    })}
+          
+          
+                                    <TableCell key='deleteLink'>
+                                      <div
+                                        className="clickableicon"
+                                        onClick={() => console.log('delete link')}
+                                      >
+                                        <TrashCan20 />
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+          
+          
+                              </TableBody>
+                            </Table>
+                          </TableContainer>
+                        )}
+                      />
+          
+                      <Button onClick={this.displayLinkForm}>Add new link</Button>
+                    </div>
+                  )
+          
+                case AppDisplayModes.linkForm:
+                  return (
+                    <Form onSubmit={this.addNewLinkHandler}>
+                      <FormGroup legendText="">
+                        <TextInput
+                          // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
+                          id="titleInput"
+                          invalidText="Invalid error message."
+                          labelText="Title"
+                          placeholder="Placeholder text"
+                          onChange={(e) => {
+                            this.editAttributeHandler(e, LinkAttributes.title)
+                          }}
+                        />
+                      </FormGroup>
+                      <FormGroup legendText="">
+                        <TextInput
+                          // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
+                          id="linkInput"
+                          invalidText="Invalid error message."
+                          labelText="Link"
+                          placeholder="Placeholder text"
+                          onChange={(e) => {
+                            this.editAttributeHandler(e, LinkAttributes.link)
+                          }}
+                        />
+                      </FormGroup>
+                      <Button kind="primary" tabIndex={0} type="submit">
+                        Submit
+                      </Button>
+                      <Button onClick={this.displayTable} kind="primary" tabIndex={0}>
+                        Back
+                      </Button>
+                    </Form>
+                  )
+          
+                case AppDisplayModes.loginForm:
+                  return (
+                    <Form onSubmit={this.loginHandler}>
+                      <FormGroup legendText="">
+                        <TextInput
+                          // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
+                          id="linkInput"
+                          invalidText="Invalid error message."
+                          labelText="User"
+                          placeholder="Placeholder text"
+                          onChange={(e) => {
+                            this.editLoginHandler(e, LoginAttributes.user)
+                          }}
+                        />
+                      </FormGroup>
+                      <FormGroup legendText="">
+                        <TextInput
+                          // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
+                          id="dateInput"
+                          invalid={this.state.loginAttempt}
+                          invalidText="Incorrect password"
+                          labelText="Password"
+                          placeholder="Placeholder text"
+                          onChange={(e) => {
+                            this.editLoginHandler(e, LoginAttributes.password)
+                          }}
+                        />
+                      </FormGroup>
+                      <Button kind="primary" tabIndex={0} type="submit">
+                        Submit
+                      </Button>
+                    </Form>
+                  )
+              }
+            })()
+          }
+        </Content>
+      </div>
+    )
   }
 }
 
