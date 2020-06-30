@@ -40,6 +40,13 @@ type LinkType = {
   linklist: number
 }
 
+type LinkListType = {
+  pk: number
+  title: string
+  date_created: string
+  owner: string
+}
+
 type RowData = LinkType & {
     id: string;
 }
@@ -67,6 +74,7 @@ class App extends React.Component<
   {
     display: AppDisplayModes
     links: LinkType[]
+    linkLists: LinkListType[]
     newLink?: LinkType
     user: string
     password: string
@@ -81,6 +89,7 @@ class App extends React.Component<
     this.state = {
       display: AppDisplayModes.loginForm,
       links: [],
+      linkLists: [],
       user: '',
       password: '',
       loginAttempt: false
@@ -173,11 +182,20 @@ class App extends React.Component<
 
     // TODO: Check database to see if correct user/password
     if (true) {
-      this.setState({
-        display: AppDisplayModes.linkTable,
-        user: 'admin',
-        password: '123passwd123'
-      })
+
+      fetch('http://127.0.0.1:8000/linklist/')
+      .then(r => {
+        if (200 <= r.status && r.status < 300) {
+          return r.json()
+        }
+      }).then(data => {
+          this.setState({
+            display: AppDisplayModes.linkTable,
+            linkLists: data,
+            user: 'admin',
+            password: '123passwd123'
+          })
+      }) // TODO: add catch
     } else {
       console.log('Incorrect password')
 
@@ -264,11 +282,11 @@ class App extends React.Component<
           aria-label="Side navigation"
         >
           <SideNavItems>
-            <SideNavLink>L0 link</SideNavLink>
-            <SideNavLink>L0 link</SideNavLink>
-            <SideNavLink>L0 link</SideNavLink>
-            <SideNavLink>L0 link</SideNavLink>
-            <SideNavLink>L0 link</SideNavLink>
+            {
+              this.state.linkLists.map(linkList => (
+                <SideNavLink>{linkList.title}</SideNavLink>
+              ))
+            }
           </SideNavItems>
         </SideNav>
         <Content>
