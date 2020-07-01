@@ -69,10 +69,13 @@ enum LoginAttributes {
   'password'
 }
 
+const missingListPkError = new Error('No link list pk')
+
 class App extends React.Component<
   {},
   {
     display: AppDisplayModes
+    linkListpk: number
     links: LinkType[]
     linkLists: LinkListType[]
     newLink?: LinkType
@@ -84,10 +87,11 @@ class App extends React.Component<
   constructor(props: any) {
     super(props)
 
-    this.getListFromDB()
+    // this.getListFromDB()
 
     this.state = {
       display: AppDisplayModes.loginForm,
+      linkListpk: -1,
       links: [],
       linkLists: [],
       user: '',
@@ -96,14 +100,18 @@ class App extends React.Component<
     }
   }
 
-  private getListFromDB = () => {
-    fetch('http://127.0.0.1:8000/linklist/20/')
+  private getListFromDB = (linkListPk: number) => {
+    if (linkListPk && linkListPk > 0) {
+      fetch(`http://127.0.0.1:8000/linklist/${linkListPk}/`)
       .then((r) => r.json())
       .then((data) => {
         this.setState({
           links: data
         })
       })
+    } else {
+      throw missingListPkError
+    }
   }
 
   private displayTable = (e: any) => {
@@ -126,55 +134,73 @@ class App extends React.Component<
     })
   }
 
-  private addNewLinkHandler = (e: any) => {
+  private selectListHandler = (e: any, linkListpk: number) => {
+    console.log('linkListpk', linkListpk)
+
+    this.getListFromDB(linkListpk)
+
+    this.setState({
+      linkListpk
+    })
+  }
+
+  private addNewLinkHandler = (e: any, linkListPk: number) => {
     e.preventDefault()
     
     const newLink = { ...this.state.newLink, date_added: dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), linklist: 20 }
 
-    fetch('http://127.0.0.1:8000/linklist/20/', {
-      headers: {
-        Authorization: `Basic ${Base64.encode(`${this.state.user}:${this.state.password}`)}`,
-        'Content-Type': 'application/json'
-      },
-      method: 'POST',
-      body: JSON.stringify(newLink)
-    }).then((r) => {
-      if (200 <= r.status && r.status < 300) {
-        const newLinks = this.state.links
-        newLinks.push(newLink as LinkType)
-
-        this.setState({
-          display: AppDisplayModes.linkTable,
-          links: newLinks,
-          newLink: undefined
-        })
-      } else {
-        console.log('Add link error', r.status, r.statusText)
-      }
-    })
+    if (linkListPk && linkListPk > 0) {
+      fetch(`http://127.0.0.1:8000/linklist/${linkListPk}/`, {
+        headers: {
+          Authorization: `Basic ${Base64.encode(`${this.state.user}:${this.state.password}`)}`,
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify(newLink)
+      }).then((r) => {
+        if (200 <= r.status && r.status < 300) {
+          const newLinks = this.state.links
+          newLinks.push(newLink as LinkType)
+  
+          this.setState({
+            display: AppDisplayModes.linkTable,
+            links: newLinks,
+            newLink: undefined
+          })
+        } else {
+          console.log('Add link error', r.status, r.statusText)
+        }
+      })
+    } else {
+      throw missingListPkError
+    }
   }
 
-  private deleteLinkHander = (e: any, pk: number) => {
-    fetch('http://127.0.0.1:8000/linklist/20/', {
-      headers: {
-        Authorization: `Basic ${Base64.encode(`${this.state.user}:${this.state.password}`)}`,
-        "Content-Type": "application/json",
-      },
-      method: 'DELETE',
-      body: JSON.stringify({ pk })
-    }).then(r => {
-      if (200 <= r.status && r.status < 300) {
-        const newLinks = this.state.links
-        const newLinksFiltered = newLinks.filter(link => link.pk !== pk)
-
-        this.setState({
-          display: AppDisplayModes.linkTable,
-          links: newLinksFiltered,
-          newLink: undefined
-        })
-      }
-      console.log('Delete link', r.status, r.statusText)
-    })
+  private deleteLinkHander = (e: any, linkPk: number, linkListPk: number) => {
+    if (linkListPk && linkListPk > 0) {
+      fetch(`http://127.0.0.1:8000/linklist/${linkListPk}/`, {
+        headers: {
+          Authorization: `Basic ${Base64.encode(`${this.state.user}:${this.state.password}`)}`,
+          "Content-Type": "application/json",
+        },
+        method: 'DELETE',
+        body: JSON.stringify({ pk: linkPk })
+      }).then(r => {
+        if (200 <= r.status && r.status < 300) {
+          const newLinks = this.state.links
+          const newLinksFiltered = newLinks.filter(link => link.pk !== linkPk)
+  
+          this.setState({
+            display: AppDisplayModes.linkTable,
+            links: newLinksFiltered,
+            newLink: undefined
+          })
+        }
+        console.log('Delete link', r.status, r.statusText)
+      })
+    } else {
+      throw missingListPkError
+    }
   }
 
   private loginHandler = (e: any) => {
@@ -182,19 +208,23 @@ class App extends React.Component<
 
     // TODO: Check database to see if correct user/password
     if (true) {
-
       fetch('http://127.0.0.1:8000/linklist/')
       .then(r => {
         if (200 <= r.status && r.status < 300) {
           return r.json()
         }
       }).then(data => {
-          this.setState({
-            display: AppDisplayModes.linkTable,
-            linkLists: data,
-            user: 'admin',
-            password: '123passwd123'
-          })
+          if ((data as LinkListType[]).length > 0) {
+            this.setState({
+              display: AppDisplayModes.linkTable,
+              linkListpk: data[0].pk,
+              linkLists: data,
+              user: 'admin',
+              password: '123passwd123'
+            })
+          } else {
+            throw new Error(`User has no link lists`)
+          }
       }) // TODO: add catch
     } else {
       console.log('Incorrect password')
@@ -284,7 +314,9 @@ class App extends React.Component<
           <SideNavItems>
             {
               this.state.linkLists.map(linkList => (
-                <SideNavLink>{linkList.title}</SideNavLink>
+                <div onClick={ (e) => { this.selectListHandler(e, linkList.pk) }}>
+                  <SideNavLink>{linkList.title}</SideNavLink> 
+                </div>
               ))
             }
           </SideNavItems>
@@ -353,7 +385,7 @@ class App extends React.Component<
                                             <TableCell key={cell.id}>
                                               <div
                                                 className="clickableicon"
-                                                onClick={(e) => this.deleteLinkHander(e, row.pk)}
+                                                onClick={(e) => this.deleteLinkHander(e, row.pk, this.state.linkListpk)}
                                               >
                                                 <TrashCan20 />
                                               </div>
@@ -384,7 +416,7 @@ class App extends React.Component<
           
                 case AppDisplayModes.linkForm:
                   return (
-                    <Form onSubmit={this.addNewLinkHandler}>
+                    <Form onSubmit={ (e) => { this.addNewLinkHandler(e, this.state.linkListpk) }}>
                       <FormGroup legendText="">
                         <TextInput
                           // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
