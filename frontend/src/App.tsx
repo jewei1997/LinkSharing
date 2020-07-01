@@ -31,6 +31,7 @@ import {
   SideNavItems,
   SideNavLink,
 } from 'carbon-components-react'
+import { ReactComponent } from '*.svg';
 
 type LinkType = {
   pk: number
@@ -48,9 +49,8 @@ type LinkListType = {
 }
 
 type RowData = LinkType & {
-    id: string;
+  id: string;
 }
-
 
 enum AppDisplayModes {
   'linkTable',
@@ -71,6 +71,271 @@ enum LoginAttributes {
 
 const missingListPkError = new Error('No link list pk')
 
+class AppHeader extends React.Component {
+  render() {
+    return (
+      <Header aria-label="IBM Platform Name">
+        <HeaderName href="#" prefix="IBM">
+          [Platform]
+        </HeaderName>
+        <HeaderGlobalBar>
+          <HeaderGlobalAction aria-label="Search" onClick={() => {}}>
+            <Search20 />
+          </HeaderGlobalAction>
+          <HeaderGlobalAction aria-label="Notifications" onClick={() => {}}>
+            <Notification20 />
+          </HeaderGlobalAction>
+          <HeaderGlobalAction aria-label="App Switcher" onClick={() => {}}>
+            <AppSwitcher20 />
+          </HeaderGlobalAction>
+        </HeaderGlobalBar>
+      </Header>
+    )
+  }
+}
+
+class AppSideBar extends React.Component<{
+  selectListHandler: (e: any, selectedLinkList: LinkListType) => void
+  linkLists: LinkListType[]
+}> {
+  render() {
+    return (
+      <SideNav
+        isFixedNav
+        expanded={true}
+        isChildOfHeader={false}
+        aria-label="Side navigation"
+      >
+        <SideNavItems>
+          {
+            this.props.linkLists.map(linkList => (
+              <div onClick={ (e) => { this.props.selectListHandler(e, linkList) }}>
+                <SideNavLink>{linkList.title}</SideNavLink> 
+              </div>
+            ))
+          }
+        </SideNavItems>
+      </SideNav>
+    )
+  }
+}
+
+class LinkTable extends React.Component<{
+  deleteLinkHander: (e: any, linkPk: number, linkListPk: number) => void
+  displayLinkForm: (e: any) => void
+
+  linkListPk: number
+  selectedLinkList: LinkListType
+  links: LinkType[]
+
+  // AppSideBar properties
+  selectListHandler: (e: any, selectedLinkList: LinkListType) => void
+  linkLists: LinkListType[]
+}> {
+  render() {
+    const rowData: RowData[] = []
+
+    this.props.links.forEach((link) => {
+      rowData.push({ ...link, id: rowData.length.toString() })
+    })
+
+    return (
+      <div>
+        <AppHeader></AppHeader>
+        <AppSideBar selectListHandler={this.props.selectListHandler} linkLists={this.props.linkLists}></AppSideBar>
+        <Content>
+        <div>
+          <DataTable
+            rows={rowData}
+            headers={[
+              {
+                header: 'Title',
+                key: 'title'
+              },
+              {
+                header: 'Link',
+                key: 'link'
+              },
+              {
+                header: 'Date Added',
+                key: 'date_added'
+              },
+              {
+                header: '',
+                key: 'deleteLink'
+              }
+            ]}
+            render={({ rows, headers, getHeaderProps }) => (
+              <TableContainer title={this.props.selectedLinkList?.title}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      {headers.map((header) => (
+                        <TableHeader {...getHeaderProps({ header })}>
+                          {header.header}
+                        </TableHeader>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {rows.map((row) => (
+                      <TableRow key={row.id}>
+                        {row.cells.map((cell) => {
+                          switch (cell.info.header) {
+                            case 'link':
+                              return (
+                                <TableCell key={cell.id}>
+                                  <Link href={cell.value}>{cell.value}</Link>
+                                </TableCell>
+                              )
+                            case 'date_added':
+                              return (
+                                <TableCell key={cell.id}>
+                                  {(cell.value as string).substring(0,10)} 
+                                </TableCell>
+                              )
+
+                            case 'deleteLink':
+                              const row = rowData.find(row => row.id === cell.id.split(':')[0]) as RowData
+
+                              return (
+                                <TableCell key={cell.id}>
+                                  <div
+                                    className="clickableicon"
+                                    onClick={(e) => this.props.deleteLinkHander(e, row.pk, this.props.linkListPk)}
+                                  >
+                                    <TrashCan20 />
+                                  </div>
+                                </TableCell>
+                              )
+
+                            default:
+                              return (
+                                <TableCell key={cell.id}>
+                                  {cell.value}
+                                </TableCell>
+                              )
+                          }
+                        })}
+                      </TableRow>
+                    ))}
+
+
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          />
+
+          <Button onClick={this.props.displayLinkForm}>Add new link</Button>
+        </div>
+        </Content>
+      </div>
+    )
+  }
+}
+
+class LinkForm extends React.Component<{
+  addNewLinkHandler: (e: any, linkListPk: number) => void
+  editAttributeHandler: (e: any, attribute: LinkAttributes) => void
+  displayTable: (e: any) => void
+
+  linkListPk: number
+
+  // AppSideBar properties
+  selectListHandler: (e: any, selectedLinkList: LinkListType) => void
+  linkLists: LinkListType[]
+}> {
+  render() {
+    return (
+      <div>
+        <AppHeader></AppHeader>
+        <AppSideBar selectListHandler={this.props.selectListHandler} linkLists={this.props.linkLists}></AppSideBar>
+        <Content>
+          <Form onSubmit={ (e) => { this.props.addNewLinkHandler(e, this.props.linkListPk) }}>
+            <FormGroup legendText="">
+              <TextInput
+                // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
+                id="titleInput"
+                invalidText="Invalid error message."
+                labelText="Title"
+                placeholder="Placeholder text"
+                onChange={(e) => {
+                  this.props.editAttributeHandler(e, LinkAttributes.title)
+                }}
+              />
+            </FormGroup>
+            <FormGroup legendText="">
+              <TextInput
+                // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
+                id="linkInput"
+                invalidText="Invalid error message."
+                labelText="Link"
+                placeholder="Placeholder text"
+                onChange={(e) => {
+                  this.props.editAttributeHandler(e, LinkAttributes.link)
+                }}
+              />
+            </FormGroup>
+            <Button kind="primary" tabIndex={0} type="submit">
+              Submit
+            </Button>
+            <Button onClick={this.props.displayTable} kind="primary" tabIndex={0}>
+              Back
+            </Button>
+          </Form>
+        </Content>
+      </div>
+    )
+  }
+}
+
+class LoginPage extends React.Component<{
+  loginHandler: (e: any) => void
+  editLoginHandler: (e: any, attribute: LoginAttributes) => void
+  loginAttempt: boolean
+}> {
+  render() {
+    return (
+      <div>
+      <AppHeader></AppHeader>
+        <Content>
+          <Form onSubmit={this.props.loginHandler}>
+            <FormGroup legendText="">
+              <TextInput
+                // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
+                id="linkInput"
+                invalidText="Invalid error message."
+                labelText="User"
+                placeholder="Placeholder text"
+                onChange={(e) => {
+                  this.props.editLoginHandler(e, LoginAttributes.user)
+                }}
+              />
+            </FormGroup>
+            <FormGroup legendText="">
+              <TextInput
+                // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
+                id="dateInput"
+                invalid={this.props.loginAttempt}
+                invalidText="Incorrect password"
+                labelText="Password"
+                placeholder="Placeholder text"
+                onChange={(e) => {
+                  this.props.editLoginHandler(e, LoginAttributes.password)
+                }}
+              />
+            </FormGroup>
+            <Button kind="primary" tabIndex={0} type="submit">
+              Submit
+            </Button>
+          </Form>
+        </Content>
+      </div>
+    )
+  }
+}
+
 class App extends React.Component<
   {},
   {
@@ -87,12 +352,9 @@ class App extends React.Component<
   constructor(props: any) {
     super(props)
 
-    // this.getListFromDB()
-
     this.state = {
       display: AppDisplayModes.loginForm,
       links: [],
-      selectedLinkList: undefined,
       linkLists: [],
       user: '',
       password: '',
@@ -279,216 +541,49 @@ class App extends React.Component<
   }
 
   render() {
-    const rowData: RowData[] = []
-
-    this.state.links.forEach((link) => {
-      rowData.push({ ...link, id: rowData.length.toString() })
-    })
-
     const linkListPk = this.state.selectedLinkList ? this.state.selectedLinkList.pk : -1
+     
+    switch (this.state.display) {
+      case AppDisplayModes.linkTable:
+        return (
+          <LinkTable
+            deleteLinkHander={this.deleteLinkHander}
+            displayLinkForm={this.displayLinkForm}
 
-    return (
-      <div>
-        <Header aria-label="IBM Platform Name">
-          <HeaderName href="#" prefix="IBM">
-            [Platform]
-          </HeaderName>
-          <HeaderGlobalBar>
-            <HeaderGlobalAction aria-label="Search" onClick={() => {}}>
-              <Search20 />
-            </HeaderGlobalAction>
-            <HeaderGlobalAction aria-label="Notifications" onClick={() => {}}>
-              <Notification20 />
-            </HeaderGlobalAction>
-            <HeaderGlobalAction aria-label="App Switcher" onClick={() => {}}>
-              <AppSwitcher20 />
-            </HeaderGlobalAction>
-          </HeaderGlobalBar>
-        </Header>
-        <SideNav
-          isFixedNav
-          expanded={true}
-          isChildOfHeader={false}
-          aria-label="Side navigation"
-        >
-          <SideNavItems>
-            {
-              this.state.linkLists.map(linkList => (
-                <div onClick={ (e) => { this.selectListHandler(e, linkList) }}>
-                  <SideNavLink>{linkList.title}</SideNavLink> 
-                </div>
-              ))
-            }
-          </SideNavItems>
-        </SideNav>
-        <Content>
-          {
-            (() => {
-              switch (this.state.display) {
-                case AppDisplayModes.linkTable:
-                  return (
-                    <div>
-                      <DataTable
-                        rows={rowData}
-                        headers={[
-                          {
-                            header: 'Title',
-                            key: 'title'
-                          },
-                          {
-                            header: 'Link',
-                            key: 'link'
-                          },
-                          {
-                            header: 'Date Added',
-                            key: 'date_added'
-                          },
-                          {
-                            header: '',
-                            key: 'deleteLink'
-                          }
-                        ]}
-                        render={({ rows, headers, getHeaderProps }) => (
-                          <TableContainer title={this.state.selectedLinkList?.title}>
-                            <Table>
-                              <TableHead>
-                                <TableRow>
-                                  {headers.map((header) => (
-                                    <TableHeader {...getHeaderProps({ header })}>
-                                      {header.header}
-                                    </TableHeader>
-                                  ))}
-                                </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                {rows.map((row) => (
-                                  <TableRow key={row.id}>
-                                    {row.cells.map((cell) => {
-                                      switch (cell.info.header) {
-                                        case 'link':
-                                          return (
-                                            <TableCell key={cell.id}>
-                                              <Link href={cell.value}>{cell.value}</Link>
-                                            </TableCell>
-                                          )
-                                        case 'date_added':
-                                          return (
-                                            <TableCell key={cell.id}>
-                                              {(cell.value as string).substring(0,10)} 
-                                            </TableCell>
-                                          )
+            linkListPk={linkListPk}
+            selectedLinkList={this.state.selectedLinkList as LinkListType} // Should not be undefined after login handler
+            links={this.state.links}
 
-                                        case 'deleteLink':
-                                          const row = rowData.find(row => row.id === cell.id.split(':')[0]) as RowData
+            // AppSideBar properties
+            selectListHandler={this.selectListHandler}
+            linkLists={this.state.linkLists}
+          ></LinkTable>
+        )
 
-                                          return (
-                                            <TableCell key={cell.id}>
-                                              <div
-                                                className="clickableicon"
-                                                onClick={(e) => this.deleteLinkHander(e, row.pk, linkListPk)}
-                                              >
-                                                <TrashCan20 />
-                                              </div>
-                                            </TableCell>
-                                          )
+      case AppDisplayModes.linkForm:
+        return (
+          <LinkForm
+            addNewLinkHandler={this.addNewLinkHandler}
+            editAttributeHandler={this.editAttributeHandler}
+            displayTable={this.displayTable}
           
-                                        default:
-                                          return (
-                                            <TableCell key={cell.id}>
-                                              {cell.value}
-                                            </TableCell>
-                                          )
-                                      }
-                                    })}
-                                  </TableRow>
-                                ))}
+            linkListPk={linkListPk}
           
-          
-                              </TableBody>
-                            </Table>
-                          </TableContainer>
-                        )}
-                      />
-          
-                      <Button onClick={this.displayLinkForm}>Add new link</Button>
-                    </div>
-                  )
-          
-                case AppDisplayModes.linkForm:
-                  return (
-                    <Form onSubmit={ (e) => { this.addNewLinkHandler(e, linkListPk) }}>
-                      <FormGroup legendText="">
-                        <TextInput
-                          // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
-                          id="titleInput"
-                          invalidText="Invalid error message."
-                          labelText="Title"
-                          placeholder="Placeholder text"
-                          onChange={(e) => {
-                            this.editAttributeHandler(e, LinkAttributes.title)
-                          }}
-                        />
-                      </FormGroup>
-                      <FormGroup legendText="">
-                        <TextInput
-                          // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
-                          id="linkInput"
-                          invalidText="Invalid error message."
-                          labelText="Link"
-                          placeholder="Placeholder text"
-                          onChange={(e) => {
-                            this.editAttributeHandler(e, LinkAttributes.link)
-                          }}
-                        />
-                      </FormGroup>
-                      <Button kind="primary" tabIndex={0} type="submit">
-                        Submit
-                      </Button>
-                      <Button onClick={this.displayTable} kind="primary" tabIndex={0}>
-                        Back
-                      </Button>
-                    </Form>
-                  )
-          
-                case AppDisplayModes.loginForm:
-                  return (
-                    <Form onSubmit={this.loginHandler}>
-                      <FormGroup legendText="">
-                        <TextInput
-                          // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
-                          id="linkInput"
-                          invalidText="Invalid error message."
-                          labelText="User"
-                          placeholder="Placeholder text"
-                          onChange={(e) => {
-                            this.editLoginHandler(e, LoginAttributes.user)
-                          }}
-                        />
-                      </FormGroup>
-                      <FormGroup legendText="">
-                        <TextInput
-                          // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
-                          id="dateInput"
-                          invalid={this.state.loginAttempt}
-                          invalidText="Incorrect password"
-                          labelText="Password"
-                          placeholder="Placeholder text"
-                          onChange={(e) => {
-                            this.editLoginHandler(e, LoginAttributes.password)
-                          }}
-                        />
-                      </FormGroup>
-                      <Button kind="primary" tabIndex={0} type="submit">
-                        Submit
-                      </Button>
-                    </Form>
-                  )
-              }
-            })()
-          }
-        </Content>
-      </div>
-    )
+            // AppSideBar properties
+            selectListHandler={this.selectListHandler}
+            linkLists={this.state.linkLists}
+          ></LinkForm>
+        )
+
+      case AppDisplayModes.loginForm:
+        return (
+          <LoginPage 
+            loginHandler={this.loginHandler} 
+            editLoginHandler={this.editLoginHandler} 
+            loginAttempt={this.state.loginAttempt}
+          ></LoginPage>
+        )
+    }
   }
 }
 

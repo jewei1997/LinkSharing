@@ -2,7 +2,7 @@
 
 Frontend TODOs:
  - [x] delete link
- - [ ] ui shell to show list of lists
+ - [x] ui shell to show list of lists
  - [ ] create, name, delete lists
  - [ ] create a sharable link for each list
  - [ ] link preview using og-*
