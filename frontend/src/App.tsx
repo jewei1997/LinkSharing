@@ -75,8 +75,8 @@ class App extends React.Component<
   {},
   {
     display: AppDisplayModes
-    linkListpk: number
     links: LinkType[]
+    selectedLinkList?: LinkListType,
     linkLists: LinkListType[]
     newLink?: LinkType
     user: string
@@ -91,8 +91,8 @@ class App extends React.Component<
 
     this.state = {
       display: AppDisplayModes.loginForm,
-      linkListpk: -1,
       links: [],
+      selectedLinkList: undefined,
       linkLists: [],
       user: '',
       password: '',
@@ -134,13 +134,11 @@ class App extends React.Component<
     })
   }
 
-  private selectListHandler = (e: any, linkListpk: number) => {
-    console.log('linkListpk', linkListpk)
-
-    this.getListFromDB(linkListpk)
+  private selectListHandler = (e: any, linkList: LinkListType) => {
+    this.getListFromDB(linkList.pk)
 
     this.setState({
-      linkListpk
+      selectedLinkList: linkList
     })
   }
 
@@ -217,7 +215,7 @@ class App extends React.Component<
           if ((data as LinkListType[]).length > 0) {
             this.setState({
               display: AppDisplayModes.linkTable,
-              linkListpk: data[0].pk,
+              selectedLinkList: data[0],
               linkLists: data,
               user: 'admin',
               password: '123passwd123'
@@ -287,6 +285,8 @@ class App extends React.Component<
       rowData.push({ ...link, id: rowData.length.toString() })
     })
 
+    const linkListPk = this.state.selectedLinkList ? this.state.selectedLinkList.pk : -1
+
     return (
       <div>
         <Header aria-label="IBM Platform Name">
@@ -314,7 +314,7 @@ class App extends React.Component<
           <SideNavItems>
             {
               this.state.linkLists.map(linkList => (
-                <div onClick={ (e) => { this.selectListHandler(e, linkList.pk) }}>
+                <div onClick={ (e) => { this.selectListHandler(e, linkList) }}>
                   <SideNavLink>{linkList.title}</SideNavLink> 
                 </div>
               ))
@@ -349,7 +349,7 @@ class App extends React.Component<
                           }
                         ]}
                         render={({ rows, headers, getHeaderProps }) => (
-                          <TableContainer title="DataTable">
+                          <TableContainer title={this.state.selectedLinkList?.title}>
                             <Table>
                               <TableHead>
                                 <TableRow>
@@ -385,7 +385,7 @@ class App extends React.Component<
                                             <TableCell key={cell.id}>
                                               <div
                                                 className="clickableicon"
-                                                onClick={(e) => this.deleteLinkHander(e, row.pk, this.state.linkListpk)}
+                                                onClick={(e) => this.deleteLinkHander(e, row.pk, linkListPk)}
                                               >
                                                 <TrashCan20 />
                                               </div>
@@ -416,7 +416,7 @@ class App extends React.Component<
           
                 case AppDisplayModes.linkForm:
                   return (
-                    <Form onSubmit={ (e) => { this.addNewLinkHandler(e, this.state.linkListpk) }}>
+                    <Form onSubmit={ (e) => { this.addNewLinkHandler(e, linkListPk) }}>
                       <FormGroup legendText="">
                         <TextInput
                           // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
