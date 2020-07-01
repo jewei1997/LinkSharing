@@ -31,7 +31,6 @@ import {
   SideNavItems,
   SideNavLink,
 } from 'carbon-components-react'
-import { ReactComponent } from '*.svg';
 
 type LinkType = {
   pk: number
@@ -94,10 +93,12 @@ class AppHeader extends React.Component {
   }
 }
 
-class AppSideBar extends React.Component<{
+type AppSideBarParams = {
   selectListHandler: (e: any, selectedLinkList: LinkListType) => void
   linkLists: LinkListType[]
-}> {
+}
+
+class AppSideBar extends React.Component<AppSideBarParams> {
   render() {
     return (
       <SideNav
@@ -120,17 +121,13 @@ class AppSideBar extends React.Component<{
   }
 }
 
-class LinkTable extends React.Component<{
+class LinkTable extends React.Component<AppSideBarParams & {
   deleteLinkHander: (e: any, linkPk: number, linkListPk: number) => void
   displayLinkForm: (e: any) => void
 
   linkListPk: number
   selectedLinkList: LinkListType
   links: LinkType[]
-
-  // AppSideBar properties
-  selectListHandler: (e: any, selectedLinkList: LinkListType) => void
-  linkLists: LinkListType[]
 }> {
   render() {
     const rowData: RowData[] = []
@@ -235,16 +232,12 @@ class LinkTable extends React.Component<{
   }
 }
 
-class LinkForm extends React.Component<{
+class LinkForm extends React.Component<AppSideBarParams & {
   addNewLinkHandler: (e: any, linkListPk: number) => void
   editAttributeHandler: (e: any, attribute: LinkAttributes) => void
   displayTable: (e: any) => void
 
   linkListPk: number
-
-  // AppSideBar properties
-  selectListHandler: (e: any, selectedLinkList: LinkListType) => void
-  linkLists: LinkListType[]
 }> {
   render() {
     return (
@@ -542,7 +535,7 @@ class App extends React.Component<
 
   render() {
     const linkListPk = this.state.selectedLinkList ? this.state.selectedLinkList.pk : -1
-     
+
     switch (this.state.display) {
       case AppDisplayModes.linkTable:
         return (
