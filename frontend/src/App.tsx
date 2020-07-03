@@ -54,6 +54,7 @@ type RowData = LinkType & {
 enum AppDisplayModes {
   'linkTable',
   'linkForm',
+  'listForm',
   'loginForm'
 }
 
@@ -61,6 +62,12 @@ enum LinkAttributes {
   'title',
   'link',
   'date_added'
+}
+
+enum ListAttributes {
+  'title',
+  'date_created',
+  'owner'
 }
 
 enum LoginAttributes {
@@ -95,6 +102,7 @@ class AppHeader extends React.Component {
 
 type AppSideBarParams = {
   selectListHandler: (e: any, selectedLinkList: LinkListType) => void
+  displayCreateNewListHandler: (e: any) => void
   linkLists: LinkListType[]
 }
 
@@ -107,6 +115,7 @@ class AppSideBar extends React.Component<AppSideBarParams> {
         isChildOfHeader={false}
         aria-label="Side navigation"
       >
+        <Button onClick={this.props.displayCreateNewListHandler}>Create new list</Button>
         <SideNavItems>
           {
             this.props.linkLists.map(linkList => (
@@ -139,7 +148,7 @@ class LinkTable extends React.Component<AppSideBarParams & {
     return (
       <div>
         <AppHeader></AppHeader>
-        <AppSideBar selectListHandler={this.props.selectListHandler} linkLists={this.props.linkLists}></AppSideBar>
+        <AppSideBar selectListHandler={this.props.selectListHandler} displayCreateNewListHandler={this.props.displayCreateNewListHandler} linkLists={this.props.linkLists}></AppSideBar>
         <Content>
         <div>
           <DataTable
@@ -232,6 +241,43 @@ class LinkTable extends React.Component<AppSideBarParams & {
   }
 }
 
+class ListForm extends React.Component<AppSideBarParams & {
+    addNewListHandler: (e: any) => void
+    editListAttributeHandler: (e: any, attribute: ListAttributes) => void
+    displayTable: (e: any) => void
+  }> {
+    render() {
+      return (
+        <div>
+          <AppHeader></AppHeader>
+          <AppSideBar selectListHandler={this.props.selectListHandler} displayCreateNewListHandler={this.props.displayCreateNewListHandler} linkLists={this.props.linkLists}></AppSideBar>
+          <Content>
+            <Form onSubmit={ (e) => { this.props.addNewListHandler(e) }}>
+              <FormGroup legendText="">
+                <TextInput
+                  // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
+                  id="titleInput"
+                  invalidText="Invalid error message."
+                  labelText="Title"
+                  placeholder="Placeholder text"
+                  onChange={(e) => {
+                    this.props.editListAttributeHandler(e, ListAttributes.title)
+                  }}
+                />
+              </FormGroup>
+              <Button kind="primary" tabIndex={0} type="submit">
+                Submit
+              </Button>
+              <Button onClick={this.props.displayTable} kind="primary" tabIndex={0}>
+                Back
+              </Button>
+            </Form>
+          </Content>
+        </div>
+      )
+    }
+  }
+
 class LinkForm extends React.Component<AppSideBarParams & {
   addNewLinkHandler: (e: any, linkListPk: number) => void
   editAttributeHandler: (e: any, attribute: LinkAttributes) => void
@@ -243,7 +289,7 @@ class LinkForm extends React.Component<AppSideBarParams & {
     return (
       <div>
         <AppHeader></AppHeader>
-        <AppSideBar selectListHandler={this.props.selectListHandler} linkLists={this.props.linkLists}></AppSideBar>
+        <AppSideBar selectListHandler={this.props.selectListHandler} displayCreateNewListHandler={this.props.displayCreateNewListHandler} linkLists={this.props.linkLists}></AppSideBar>
         <Content>
           <Form onSubmit={ (e) => { this.props.addNewLinkHandler(e, this.props.linkListPk) }}>
             <FormGroup legendText="">
@@ -337,6 +383,7 @@ class App extends React.Component<
     selectedLinkList?: LinkListType,
     linkLists: LinkListType[]
     newLink?: LinkType
+    newLinkList?: LinkListType
     user: string
     password: string
     loginAttempt: boolean
@@ -355,6 +402,7 @@ class App extends React.Component<
     }
   }
 
+  // TODO: getListFromDB is a misleading name as it sets the state and deosnt return anything!
   private getListFromDB = (linkListPk: number) => {
     if (linkListPk && linkListPk > 0) {
       fetch(`http://127.0.0.1:8000/linklist/${linkListPk}/`)
@@ -367,6 +415,17 @@ class App extends React.Component<
     } else {
       throw missingListPkError
     }
+  }
+
+  private updateListsFromDB = () => {
+    fetch('http://127.0.0.1:8000/linklist/')
+    .then(r => {
+      if (200 <= r.status && r.status < 300) {
+        return r.json()
+      }
+    }).then(data => {
+        this.setState({linkLists: data})
+      })
   }
 
   private displayTable = (e: any) => {
@@ -397,10 +456,54 @@ class App extends React.Component<
     })
   }
 
+  private displayCreateNewListHandler = (e: any) => {
+    this.setState({
+      display: AppDisplayModes.listForm,
+      newLinkList: {
+        pk: -1,
+        title: '',
+        date_created: '',
+        owner: ''
+      }
+    })
+  }
+
+  private addNewListHandler = (e: any) => {
+    e.preventDefault()
+    const newList = {
+      ...this.state.newLinkList, 
+      date_created: dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+      owner: "admin"  // TODO: fix after login
+    }
+
+
+    // make a POST request to add list to list of linklists
+    fetch('http://127.0.0.1:8000/linklist/', {
+      headers: {
+        Authorization: `Basic ${Base64.encode(`admin:123passwd123`)}`,
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify(newList)
+    }).then((r) => {
+      if (200 <= r.status && r.status < 300) {
+
+        this.updateListsFromDB()
+
+        this.setState({
+          display: AppDisplayModes.linkTable,
+          newLinkList: undefined
+        })
+      } else {
+        console.log('Add list error', r.status, r.statusText)
+      }
+    })
+  }
+
   private addNewLinkHandler = (e: any, linkListPk: number) => {
     e.preventDefault()
     
-    const newLink = { ...this.state.newLink, date_added: dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), linklist: 20 }
+    const newLink = { ...this.state.newLink, date_added: dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), linklist: 20 }  // TODO: remove this hardcoded 20
 
     if (linkListPk && linkListPk > 0) {
       fetch(`http://127.0.0.1:8000/linklist/${linkListPk}/`, {
@@ -460,32 +563,17 @@ class App extends React.Component<
     e.preventDefault()
 
     // TODO: Check database to see if correct user/password
-    if (true) {
-      fetch('http://127.0.0.1:8000/linklist/')
-      .then(r => {
-        if (200 <= r.status && r.status < 300) {
-          return r.json()
-        }
-      }).then(data => {
-          if ((data as LinkListType[]).length > 0) {
-            this.setState({
-              display: AppDisplayModes.linkTable,
-              selectedLinkList: data[0],
-              linkLists: data,
-              user: 'admin',
-              password: '123passwd123'
-            })
-          } else {
-            throw new Error(`User has no link lists`)
-          }
-      }) // TODO: add catch
-    } else {
-      console.log('Incorrect password')
 
-      this.setState({
-        loginAttempt: true
-      })
-    }
+    this.updateListsFromDB()
+
+    const linkLists = this.state.linkLists
+
+    this.setState({
+      display: AppDisplayModes.linkTable,
+      selectedLinkList: linkLists[0],
+      user: 'admin',
+      password: '123passwd123'
+    })
   }
 
   private editAttributeHandler = (e: any, attribute: LinkAttributes) => {
@@ -510,6 +598,28 @@ class App extends React.Component<
 
     this.setState({
       newLink
+    })
+  }
+
+  private editListAttributeHandler = (e : any, attribute: ListAttributes) => {
+    const newList = this.state.newLinkList as LinkListType
+
+    switch (attribute) {
+      case ListAttributes.title:
+        newList.title = e.target.value
+        break
+
+      case ListAttributes.date_created:
+        newList.date_created = e.target.value
+        break
+
+      case ListAttributes.owner:
+        newList.owner = e.target.value
+        break
+    }
+
+    this.setState({
+      newLinkList: newList
     })
   }
 
@@ -549,8 +659,23 @@ class App extends React.Component<
 
             // AppSideBar properties
             selectListHandler={this.selectListHandler}
+            displayCreateNewListHandler={this.displayCreateNewListHandler}
             linkLists={this.state.linkLists}
           ></LinkTable>
+        )
+
+      case AppDisplayModes.listForm:
+        return (
+          <ListForm
+            addNewListHandler={this.addNewListHandler}
+            editListAttributeHandler={this.editListAttributeHandler}
+            displayTable={this.displayTable}
+
+            // AppSideBar properties
+            selectListHandler={this.selectListHandler}
+            displayCreateNewListHandler={this.displayCreateNewListHandler}
+            linkLists={this.state.linkLists}
+          ></ListForm>
         )
 
       case AppDisplayModes.linkForm:
@@ -564,6 +689,7 @@ class App extends React.Component<
           
             // AppSideBar properties
             selectListHandler={this.selectListHandler}
+            displayCreateNewListHandler={this.displayCreateNewListHandler}
             linkLists={this.state.linkLists}
           ></LinkForm>
         )
