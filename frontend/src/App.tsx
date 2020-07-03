@@ -129,7 +129,7 @@ class AppSideBar extends React.Component<AppSideBarParams> {
   }
 }
 
-class LinkTable extends React.Component<AppSideBarParams & {
+class LinkTable extends React.Component<{
   deleteLinkHander: (e: any, linkPk: number, linkListPk: number) => void
   displayLinkForm: (e: any) => void
 
@@ -145,10 +145,6 @@ class LinkTable extends React.Component<AppSideBarParams & {
     })
 
     return (
-      <div>
-        <AppHeader></AppHeader>
-        <AppSideBar selectListHandler={this.props.selectListHandler} displayCreateNewListHandler={this.props.displayCreateNewListHandler} linkLists={this.props.linkLists}></AppSideBar>
-        <Content>
         <div>
           <DataTable
             rows={rowData}
@@ -234,50 +230,42 @@ class LinkTable extends React.Component<AppSideBarParams & {
 
           <Button onClick={this.props.displayLinkForm}>Add new link</Button>
         </div>
-        </Content>
-      </div>
     )
   }
 }
 
-class ListForm extends React.Component<AppSideBarParams & {
+class ListForm extends React.Component<{
     addNewListHandler: (e: any) => void
     editListAttributeHandler: (e: any, attribute: ListAttributes) => void
     displayTable: (e: any) => void
   }> {
     render() {
       return (
-        <div>
-          <AppHeader></AppHeader>
-          <AppSideBar selectListHandler={this.props.selectListHandler} displayCreateNewListHandler={this.props.displayCreateNewListHandler} linkLists={this.props.linkLists}></AppSideBar>
-          <Content>
-            <Form onSubmit={ (e) => { this.props.addNewListHandler(e) }}>
-              <FormGroup legendText="">
-                <TextInput
-                  // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
-                  id="titleInput"
-                  invalidText="Invalid error message."
-                  labelText="Title"
-                  placeholder="Placeholder text"
-                  onChange={(e) => {
-                    this.props.editListAttributeHandler(e, ListAttributes.title)
-                  }}
-                />
-              </FormGroup>
-              <Button kind="primary" tabIndex={0} type="submit">
-                Submit
-              </Button>
-              <Button onClick={this.props.displayTable} kind="primary" tabIndex={0}>
-                Back
-              </Button>
-            </Form>
-          </Content>
-        </div>
+        <Form onSubmit={ (e) => { this.props.addNewListHandler(e) }}>
+          <FormGroup legendText="">
+            <TextInput
+              // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
+              id="titleInput"
+              invalidText="Invalid error message."
+              labelText="Title"
+              placeholder="Placeholder text"
+              onChange={(e) => {
+                this.props.editListAttributeHandler(e, ListAttributes.title)
+              }}
+            />
+          </FormGroup>
+          <Button kind="primary" tabIndex={0} type="submit">
+            Submit
+          </Button>
+          <Button onClick={this.props.displayTable} kind="primary" tabIndex={0}>
+            Back
+          </Button>
+        </Form>
       )
     }
   }
 
-class LinkForm extends React.Component<AppSideBarParams & {
+class LinkForm extends React.Component<{
   addNewLinkHandler: (e: any, linkListPk: number) => void
   editAttributeHandler: (e: any, attribute: LinkAttributes) => void
   displayTable: (e: any) => void
@@ -286,44 +274,38 @@ class LinkForm extends React.Component<AppSideBarParams & {
 }> {
   render() {
     return (
-      <div>
-        <AppHeader></AppHeader>
-        <AppSideBar selectListHandler={this.props.selectListHandler} displayCreateNewListHandler={this.props.displayCreateNewListHandler} linkLists={this.props.linkLists}></AppSideBar>
-        <Content>
-          <Form onSubmit={ (e) => { this.props.addNewLinkHandler(e, this.props.linkListPk) }}>
-            <FormGroup legendText="">
-              <TextInput
-                // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
-                id="titleInput"
-                invalidText="Invalid error message."
-                labelText="Title"
-                placeholder="Placeholder text"
-                onChange={(e) => {
-                  this.props.editAttributeHandler(e, LinkAttributes.title)
-                }}
-              />
-            </FormGroup>
-            <FormGroup legendText="">
-              <TextInput
-                // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
-                id="linkInput"
-                invalidText="Invalid error message."
-                labelText="Link"
-                placeholder="Placeholder text"
-                onChange={(e) => {
-                  this.props.editAttributeHandler(e, LinkAttributes.link)
-                }}
-              />
-            </FormGroup>
-            <Button kind="primary" tabIndex={0} type="submit">
-              Submit
+      <Form onSubmit={(e) => { this.props.addNewLinkHandler(e, this.props.linkListPk) }}>
+        <FormGroup legendText="">
+          <TextInput
+            // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
+            id="titleInput"
+            invalidText="Invalid error message."
+            labelText="Title"
+            placeholder="Placeholder text"
+            onChange={(e) => {
+              this.props.editAttributeHandler(e, LinkAttributes.title)
+            }}
+          />
+        </FormGroup>
+        <FormGroup legendText="">
+          <TextInput
+            // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
+            id="linkInput"
+            invalidText="Invalid error message."
+            labelText="Link"
+            placeholder="Placeholder text"
+            onChange={(e) => {
+              this.props.editAttributeHandler(e, LinkAttributes.link)
+            }}
+          />
+        </FormGroup>
+        <Button kind="primary" tabIndex={0} type="submit">
+          Submit
             </Button>
-            <Button onClick={this.props.displayTable} kind="primary" tabIndex={0}>
-              Back
+        <Button onClick={this.props.displayTable} kind="primary" tabIndex={0}>
+          Back
             </Button>
-          </Form>
-        </Content>
-      </div>
+      </Form>
     )
   }
 }
@@ -645,52 +627,61 @@ class App extends React.Component<
   render() {
     const linkListPk = this.state.selectedLinkList ? this.state.selectedLinkList.pk : -1
 
+    let sidebar = <AppSideBar
+          selectListHandler={this.selectListHandler}
+          displayCreateNewListHandler={this.displayCreateNewListHandler}
+          linkLists={this.state.linkLists}>
+        </AppSideBar>
+
     switch (this.state.display) {
       case AppDisplayModes.linkTable:
         return (
-          <LinkTable
-            deleteLinkHander={this.deleteLinkHander}
-            displayLinkForm={this.displayLinkForm}
+          <div>
+          <AppHeader></AppHeader>
+          {sidebar}
+          <Content>
+            <LinkTable
+              deleteLinkHander={this.deleteLinkHander}
+              displayLinkForm={this.displayLinkForm}
 
-            linkListPk={linkListPk}
-            selectedLinkList={this.state.selectedLinkList as LinkListType} // Should not be undefined after login handler
-            links={this.state.links}
-
-            // AppSideBar properties
-            selectListHandler={this.selectListHandler}
-            displayCreateNewListHandler={this.displayCreateNewListHandler}
-            linkLists={this.state.linkLists}
-          ></LinkTable>
+              linkListPk={linkListPk}
+              selectedLinkList={this.state.selectedLinkList as LinkListType} // Should not be undefined after login handler
+              links={this.state.links}
+            ></LinkTable>
+          </Content>
+          </div>
         )
 
       case AppDisplayModes.listForm:
         return (
-          <ListForm
-            addNewListHandler={this.addNewListHandler}
-            editListAttributeHandler={this.editListAttributeHandler}
-            displayTable={this.displayTable}
-
-            // AppSideBar properties
-            selectListHandler={this.selectListHandler}
-            displayCreateNewListHandler={this.displayCreateNewListHandler}
-            linkLists={this.state.linkLists}
-          ></ListForm>
+          <div>
+          <AppHeader></AppHeader>
+          {sidebar}
+          <Content>
+            <ListForm
+              addNewListHandler={this.addNewListHandler}
+              editListAttributeHandler={this.editListAttributeHandler}
+              displayTable={this.displayTable}
+            ></ListForm>
+          </Content>
+          </div>
         )
 
       case AppDisplayModes.linkForm:
         return (
-          <LinkForm
-            addNewLinkHandler={this.addNewLinkHandler}
-            editAttributeHandler={this.editAttributeHandler}
-            displayTable={this.displayTable}
-          
-            linkListPk={linkListPk}
-          
-            // AppSideBar properties
-            selectListHandler={this.selectListHandler}
-            displayCreateNewListHandler={this.displayCreateNewListHandler}
-            linkLists={this.state.linkLists}
-          ></LinkForm>
+          <div>
+          <AppHeader></AppHeader>
+          {sidebar}
+          <Content>
+            <LinkForm
+              addNewLinkHandler={this.addNewLinkHandler}
+              editAttributeHandler={this.editAttributeHandler}
+              displayTable={this.displayTable}
+            
+              linkListPk={linkListPk}
+            ></LinkForm>
+          </Content>
+          </div>
         )
 
       case AppDisplayModes.loginForm:
