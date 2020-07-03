@@ -80,9 +80,8 @@ const missingListPkError = new Error('No link list pk')
 class AppHeader extends React.Component {
   render() {
     return (
-      <Header aria-label="IBM Platform Name">
-        <HeaderName href="#" prefix="IBM">
-          [Platform]
+      <Header aria-label="">
+        <HeaderName href="#" prefix="LinkSharing">
         </HeaderName>
         <HeaderGlobalBar>
           <HeaderGlobalAction aria-label="Search" onClick={() => {}}>
