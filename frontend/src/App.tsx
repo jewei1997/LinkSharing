@@ -8,6 +8,9 @@ import { TrashCan20, Search20, Notification20, AppSwitcher20 } from '@carbon/ico
 // @ts-ignore
 import { default as dt } from "py-datetime";
 
+// @ts-ignore
+import {getPreview} from 'kahaki';
+
 import {
   Button,
   Content,
@@ -59,9 +62,9 @@ enum AppDisplayModes {
 }
 
 enum LinkAttributes {
-  'title',
-  'link',
-  'date_added'
+  'title' = 'title',
+  'link' = 'link',
+  'date_added' = 'date_added'
 }
 
 enum ListAttributes {
@@ -179,49 +182,30 @@ class LinkTable extends React.Component<{
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {rows.map((row) => (
-                      <TableRow key={row.id}>
-                        {row.cells.map((cell) => {
-                          switch (cell.info.header) {
-                            case 'link':
-                              return (
-                                <TableCell key={cell.id}>
-                                  <Link href={cell.value}>{cell.value}</Link>
-                                </TableCell>
-                              )
-                            case 'date_added':
-                              return (
-                                <TableCell key={cell.id}>
-                                  {(cell.value as string).substring(0,10)} 
-                                </TableCell>
-                              )
-
-                            case 'deleteLink':
-                              const row = rowData.find(row => row.id === cell.id.split(':')[0]) as RowData
-
-                              return (
-                                <TableCell key={cell.id}>
-                                  <div
-                                    className="clickableicon"
-                                    onClick={(e) => this.props.deleteLinkHander(e, row.pk, this.props.linkListPk)}
-                                  >
-                                    <TrashCan20 />
-                                  </div>
-                                </TableCell>
-                              )
-
-                            default:
-                              return (
-                                <TableCell key={cell.id}>
-                                  {cell.value}
-                                </TableCell>
-                              )
-                          }
-                        })}
-                      </TableRow>
-                    ))}
-
-
+                    {rows.map((row) => {
+                      console.log("row = ", row)
+                      const linkCell = row.cells.find(cell => {
+                        return cell.info.header === LinkAttributes.link
+                      })
+                      //@ts-ignore
+                      const link = linkCell.value
+                      fetch(link).then((r) => r.json())
+                      .then((data) => console.log(data))
+                      // getPreview(link)
+                      //   // @ts-ignore
+                      //   .then((data) => {
+                      //   // @ts-ignore
+                      //   const title = data.title
+                      //   return (
+                      //     <TableRow key={row.id}>
+                      //         <TableCell>data.images[0]</TableCell>
+                      //         <TableCell>{title}</TableCell>
+                      //         <TableCell>data.url</TableCell>
+                      //         <TableCell>data.description</TableCell>
+                      //     </TableRow>
+                      //   )
+                      })
+                  })}
                   </TableBody>
                 </Table>
               </TableContainer>
