@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "tsc",
+    "start": "npm run build && node lib/server.js"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.0",
@@ -15,7 +16,9 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
-    "link-preview-js": "^2.0.4"
+    "link-preview-js": "^2.0.4",
+    "query-string": "^6.13.1"
   }
 }
