@@ -9,7 +9,7 @@ import { TrashCan20, Search20, Notification20, AppSwitcher20 } from '@carbon/ico
 import { default as dt } from "py-datetime";
 
 // @ts-ignore
-import {getPreview} from 'kahaki';
+import queryString from 'query-string';
 
 import {
   Button,
@@ -87,13 +87,13 @@ class AppHeader extends React.Component {
         <HeaderName href="#" prefix="LinkSharing">
         </HeaderName>
         <HeaderGlobalBar>
-          <HeaderGlobalAction aria-label="Search" onClick={() => {}}>
+          <HeaderGlobalAction aria-label="Search" onClick={() => { }}>
             <Search20 />
           </HeaderGlobalAction>
-          <HeaderGlobalAction aria-label="Notifications" onClick={() => {}}>
+          <HeaderGlobalAction aria-label="Notifications" onClick={() => { }}>
             <Notification20 />
           </HeaderGlobalAction>
-          <HeaderGlobalAction aria-label="App Switcher" onClick={() => {}}>
+          <HeaderGlobalAction aria-label="App Switcher" onClick={() => { }}>
             <AppSwitcher20 />
           </HeaderGlobalAction>
         </HeaderGlobalBar>
@@ -121,8 +121,8 @@ class AppSideBar extends React.Component<AppSideBarParams> {
         <SideNavItems>
           {
             this.props.linkLists.map(linkList => (
-              <div onClick={ (e) => { this.props.selectListHandler(e, linkList) }}>
-                <SideNavLink>{linkList.title}</SideNavLink> 
+              <div onClick={(e) => { this.props.selectListHandler(e, linkList) }}>
+                <SideNavLink>{linkList.title}</SideNavLink>
               </div>
             ))
           }
@@ -143,111 +143,149 @@ class LinkTable extends React.Component<{
   render() {
     const rowData: RowData[] = []
 
+    console.log("this.props.links = ", this.props.links)
+
+    const links: string[] = []
+    this.props.links.forEach((linkObject) => {links.push(linkObject.link)})
+
+    console.log("links = ", links)
+
+    // get link preview info
+    fetch(`http://127.0.0.1:3006/link-preview?${queryString.stringify({ links })}`)
+    .then((resp)=>{return resp.json()})
+    .then((data) => {
+      console.log("links data = ", data)
+    })
+
     this.props.links.forEach((link) => {
       rowData.push({ ...link, id: rowData.length.toString() })
     })
 
-    return (
-        <div>
-          <DataTable
-            rows={rowData}
-            headers={[
-              {
-                header: 'Title',
-                key: 'title'
-              },
-              {
-                header: 'Link',
-                key: 'link'
-              },
-              {
-                header: 'Date Added',
-                key: 'date_added'
-              },
-              {
-                header: '',
-                key: 'deleteLink'
-              }
-            ]}
-            render={({ rows, headers, getHeaderProps }) => (
-              <TableContainer title={this.props.selectedLinkList?.title}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      {headers.map((header) => (
-                        <TableHeader {...getHeaderProps({ header })}>
-                          {header.header}
-                        </TableHeader>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {rows.map((row) => {
-                      console.log("row = ", row)
-                      const linkCell = row.cells.find(cell => {
-                        return cell.info.header === LinkAttributes.link
-                      })
-                      //@ts-ignore
-                      const link = linkCell.value
-                      fetch(link).then((r) => r.json())
-                      .then((data) => console.log(data))
-                      // getPreview(link)
-                      //   // @ts-ignore
-                      //   .then((data) => {
-                      //   // @ts-ignore
-                      //   const title = data.title
-                      //   return (
-                      //     <TableRow key={row.id}>
-                      //         <TableCell>data.images[0]</TableCell>
-                      //         <TableCell>{title}</TableCell>
-                      //         <TableCell>data.url</TableCell>
-                      //         <TableCell>data.description</TableCell>
-                      //     </TableRow>
-                      //   )
-                      })
-                  })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            )}
-          />
+    console.log("here")
+    console.log("rowData = ", rowData)
 
-          <Button onClick={this.props.displayLinkForm}>Add new link</Button>
-        </div>
+    return (
+      <div>
+        <DataTable
+          rows={rowData}
+          headers={[
+            {
+              header: 'Title',
+              key: 'title'
+            },
+            {
+              header: 'Link',
+              key: 'link'
+            },
+            {
+              header: 'Date Added',
+              key: 'date_added'
+            },
+            {
+              header: '',
+              key: 'deleteLink'
+            }
+          ]}
+          render={({ rows, headers, getHeaderProps }) => {
+
+            let links = rows.map(row => {
+              const linkCell = row.cells.find(cell => {
+                return cell.info.header === LinkAttributes.link
+              })
+              //@ts-ignore
+              return linkCell.value
+            })
+
+
+            links = ["https://tesla.com", "https://twitch.com"]
+            console.log("links = ", links)
+            const qStr = queryString.stringify({ links })
+            console.log("qStr = ", qStr)
+
+            return (
+                  <TableContainer title={this.props.selectedLinkList?.title}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          {headers.map((header) => (
+                            <TableHeader {...getHeaderProps({ header })}>
+                              {header.header}
+                            </TableHeader>
+                          ))}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+            )
+              // .then(data => {
+              //   console.log("data = ", data)
+              //   return (<h1>hi</h1>)
+                // const tableCells = data.map(d => {
+                //   console.log("d = ", d)
+                //   return (
+                //     <TableCell>hellooo</TableCell>
+                //   )
+                // })
+                // return (
+                //   <TableContainer title={this.props.selectedLinkList?.title}>
+                //     <Table>
+                //       <TableHead>
+                //         <TableRow>
+                //           {headers.map((header) => (
+                //             <TableHeader {...getHeaderProps({ header })}>
+                //               {header.header}
+                //             </TableHeader>
+                //           ))}
+                //         </TableRow>
+                //       </TableHead>
+                //       <TableBody>
+                //       </TableBody>
+                //     </Table>
+                //   </TableContainer>
+                // )
+              // })
+
+          }}
+        />
+
+        <Button onClick={this.props.displayLinkForm}>Add new link</Button>
+      </div>
     )
   }
 }
 
 class ListForm extends React.Component<{
-    addNewListHandler: (e: any) => void
-    editListAttributeHandler: (e: any, attribute: ListAttributes) => void
-    displayTable: (e: any) => void
-  }> {
-    render() {
-      return (
-        <Form onSubmit={ (e) => { this.props.addNewListHandler(e) }}>
-          <FormGroup legendText="">
-            <TextInput
-              // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
-              id="titleInput"
-              invalidText="Invalid error message."
-              labelText="Title"
-              placeholder="Placeholder text"
-              onChange={(e) => {
-                this.props.editListAttributeHandler(e, ListAttributes.title)
-              }}
-            />
-          </FormGroup>
-          <Button kind="primary" tabIndex={0} type="submit">
-            Submit
+  addNewListHandler: (e: any) => void
+  editListAttributeHandler: (e: any, attribute: ListAttributes) => void
+  displayTable: (e: any) => void
+}> {
+  render() {
+    return (
+      <Form onSubmit={(e) => { this.props.addNewListHandler(e) }}>
+        <FormGroup legendText="">
+          <TextInput
+            // helperText="Optional helper text here; if message is more than one line text should wrap (~100 character count maximum)"
+            id="titleInput"
+            invalidText="Invalid error message."
+            labelText="Title"
+            placeholder="Placeholder text"
+            onChange={(e) => {
+              this.props.editListAttributeHandler(e, ListAttributes.title)
+            }}
+          />
+        </FormGroup>
+        <Button kind="primary" tabIndex={0} type="submit">
+          Submit
           </Button>
-          <Button onClick={this.props.displayTable} kind="primary" tabIndex={0}>
-            Back
+        <Button onClick={this.props.displayTable} kind="primary" tabIndex={0}>
+          Back
           </Button>
-        </Form>
-      )
-    }
+      </Form>
+    )
   }
+}
 
 class LinkForm extends React.Component<{
   addNewLinkHandler: (e: any, linkListPk: number) => void
@@ -302,7 +340,7 @@ class LoginPage extends React.Component<{
   render() {
     return (
       <div>
-      <AppHeader></AppHeader>
+        <AppHeader></AppHeader>
         <Content>
           <Form onSubmit={this.props.loginHandler}>
             <FormGroup legendText="">
@@ -353,7 +391,7 @@ class App extends React.Component<
     password: string
     loginAttempt: boolean
   }
-> {
+  > {
   constructor(props: any) {
     super(props)
 
@@ -371,12 +409,12 @@ class App extends React.Component<
   private getListFromDB = (linkListPk: number) => {
     if (linkListPk && linkListPk > 0) {
       fetch(`http://127.0.0.1:8000/linklist/${linkListPk}/`)
-      .then((r) => r.json())
-      .then((data) => {
-        this.setState({
-          links: data
+        .then((r) => r.json())
+        .then((data) => {
+          this.setState({
+            links: data
+          })
         })
-      })
     } else {
       throw missingListPkError
     }
@@ -384,12 +422,12 @@ class App extends React.Component<
 
   private updateListsFromDB = () => {
     fetch('http://127.0.0.1:8000/linklist/')
-    .then(r => {
-      if (200 <= r.status && r.status < 300) {
-        return r.json()
-      }
-    }).then(data => {
-        this.setState({linkLists: data})
+      .then(r => {
+        if (200 <= r.status && r.status < 300) {
+          return r.json()
+        }
+      }).then(data => {
+        this.setState({ linkLists: data })
       })
   }
 
@@ -436,7 +474,7 @@ class App extends React.Component<
   private addNewListHandler = (e: any) => {
     e.preventDefault()
     const newList = {
-      ...this.state.newLinkList, 
+      ...this.state.newLinkList,
       date_created: dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
       owner: "admin"  // TODO: fix after login
     }
@@ -467,7 +505,7 @@ class App extends React.Component<
 
   private addNewLinkHandler = (e: any, linkListPk: number) => {
     e.preventDefault()
-    
+
     const newLink = { ...this.state.newLink, date_added: dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), linklist: 20 }  // TODO: remove this hardcoded 20
 
     if (linkListPk && linkListPk > 0) {
@@ -482,7 +520,7 @@ class App extends React.Component<
         if (200 <= r.status && r.status < 300) {
           const newLinks = this.state.links
           newLinks.push(newLink as LinkType)
-  
+
           this.setState({
             display: AppDisplayModes.linkTable,
             links: newLinks,
@@ -510,7 +548,7 @@ class App extends React.Component<
         if (200 <= r.status && r.status < 300) {
           const newLinks = this.state.links
           const newLinksFiltered = newLinks.filter(link => link.pk !== linkPk)
-  
+
           this.setState({
             display: AppDisplayModes.linkTable,
             links: newLinksFiltered,
@@ -566,7 +604,7 @@ class App extends React.Component<
     })
   }
 
-  private editListAttributeHandler = (e : any, attribute: ListAttributes) => {
+  private editListAttributeHandler = (e: any, attribute: ListAttributes) => {
     const newList = this.state.newLinkList as LinkListType
 
     switch (attribute) {
@@ -589,7 +627,7 @@ class App extends React.Component<
   }
 
   private editLoginHandler = (e: any, attribute: LoginAttributes) => {
-    let {user, password} = this.state
+    let { user, password } = this.state
 
     switch (attribute) {
       case LoginAttributes.user:
@@ -612,67 +650,67 @@ class App extends React.Component<
     const linkListPk = this.state.selectedLinkList ? this.state.selectedLinkList.pk : -1
 
     let sidebar = <AppSideBar
-          selectListHandler={this.selectListHandler}
-          displayCreateNewListHandler={this.displayCreateNewListHandler}
-          linkLists={this.state.linkLists}>
-        </AppSideBar>
+      selectListHandler={this.selectListHandler}
+      displayCreateNewListHandler={this.displayCreateNewListHandler}
+      linkLists={this.state.linkLists}>
+    </AppSideBar>
 
     switch (this.state.display) {
       case AppDisplayModes.linkTable:
         return (
           <div>
-          <AppHeader></AppHeader>
-          {sidebar}
-          <Content>
-            <LinkTable
-              deleteLinkHander={this.deleteLinkHander}
-              displayLinkForm={this.displayLinkForm}
+            <AppHeader></AppHeader>
+            {sidebar}
+            <Content>
+              <LinkTable
+                deleteLinkHander={this.deleteLinkHander}
+                displayLinkForm={this.displayLinkForm}
 
-              linkListPk={linkListPk}
-              selectedLinkList={this.state.selectedLinkList as LinkListType} // Should not be undefined after login handler
-              links={this.state.links}
-            ></LinkTable>
-          </Content>
+                linkListPk={linkListPk}
+                selectedLinkList={this.state.selectedLinkList as LinkListType} // Should not be undefined after login handler
+                links={this.state.links}
+              ></LinkTable>
+            </Content>
           </div>
         )
 
       case AppDisplayModes.listForm:
         return (
           <div>
-          <AppHeader></AppHeader>
-          {sidebar}
-          <Content>
-            <ListForm
-              addNewListHandler={this.addNewListHandler}
-              editListAttributeHandler={this.editListAttributeHandler}
-              displayTable={this.displayTable}
-            ></ListForm>
-          </Content>
+            <AppHeader></AppHeader>
+            {sidebar}
+            <Content>
+              <ListForm
+                addNewListHandler={this.addNewListHandler}
+                editListAttributeHandler={this.editListAttributeHandler}
+                displayTable={this.displayTable}
+              ></ListForm>
+            </Content>
           </div>
         )
 
       case AppDisplayModes.linkForm:
         return (
           <div>
-          <AppHeader></AppHeader>
-          {sidebar}
-          <Content>
-            <LinkForm
-              addNewLinkHandler={this.addNewLinkHandler}
-              editAttributeHandler={this.editAttributeHandler}
-              displayTable={this.displayTable}
-            
-              linkListPk={linkListPk}
-            ></LinkForm>
-          </Content>
+            <AppHeader></AppHeader>
+            {sidebar}
+            <Content>
+              <LinkForm
+                addNewLinkHandler={this.addNewLinkHandler}
+                editAttributeHandler={this.editAttributeHandler}
+                displayTable={this.displayTable}
+
+                linkListPk={linkListPk}
+              ></LinkForm>
+            </Content>
           </div>
         )
 
       case AppDisplayModes.loginForm:
         return (
-          <LoginPage 
-            loginHandler={this.loginHandler} 
-            editLoginHandler={this.editLoginHandler} 
+          <LoginPage
+            loginHandler={this.loginHandler}
+            editLoginHandler={this.editLoginHandler}
             loginAttempt={this.state.loginAttempt}
           ></LoginPage>
         )

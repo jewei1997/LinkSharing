@@ -6,19 +6,27 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import {getLinkPreview} from 'link-preview-js';
+const cors = require('cors')
 const app = express()
+
+app.use(cors())
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
-app.get('/api/object', (req, res) => {
+app.get('/link-preview', (req, res) => {
 
-  console.log(req.query)
+  console.log("request received for req = ", req)
 
-  getLinkPreview("https://tesla.com")
-  .then((data) => console.log(data));
-  res.send({
-    data: 'object'
+  //@ts-ignore
+  const linkPromises = req.query.links.map(link => {
+    return getLinkPreview(link)
+  })
+
+  Promise.all(linkPromises)
+  .then(data => {
+    console.log("resulting data to return = ", data)
+    res.send(data)
   })
 })
 
