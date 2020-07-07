@@ -1,15 +1,13 @@
-from users.models import CustomUser
 from django.http import HttpResponse
 from django.views.generic import ListView
 from linklist.models import Link, LinkList
 from django.template import loader
 from linklist.serializers import LinkListSerializer, LinkSerializer
-from users.serializers import CustomUserSerializer
 from django.http import Http404
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from rest_framework import status, generics, permissions
+from rest_framework import status, permissions
 from rest_framework.views import APIView
 
 
@@ -67,14 +65,3 @@ class LinkListView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         link.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-# some User views, following the tutorial
-class UserList(generics.ListAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
-
-
-class UserDetail(generics.RetrieveAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
