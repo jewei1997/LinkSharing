@@ -9,6 +9,9 @@ Frontend TODOs:
  - [ ] actual login
  - [ ] routing
  - [ ] cool logo
+ - [ ] if no preview image exists, use a favicon
+ - [ ] fix link delete button
+ - [ ] add date_added to link table
 
  Stretch goals
  - [ ] hover over tint delete link button

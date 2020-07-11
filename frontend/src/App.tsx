@@ -6,10 +6,12 @@ import { Base64 } from 'js-base64'
 import { TrashCan20, Search20, Notification20, AppSwitcher20 } from '@carbon/icons-react'
 
 // @ts-ignore
-import { default as dt } from "py-datetime";
+import { default as dt } from "py-datetime"
 
 // @ts-ignore
-import queryString from 'query-string';
+import queryString from 'query-string'
+
+import { PreviewData as LinkPreviewData } from '../../server/src/previewDataType'
 
 import {
   Button,
@@ -139,30 +141,14 @@ class LinkTable extends React.Component<{
   linkListPk: number
   selectedLinkList: LinkListType
   links: LinkType[]
+
+  previewData: LinkPreviewData[]
 }> {
   render() {
     const rowData: RowData[] = []
 
-    console.log("this.props.links = ", this.props.links)
-
     const links: string[] = []
-    this.props.links.forEach((linkObject) => {links.push(linkObject.link)})
-
-    console.log("links = ", links)
-
-    // get link preview info
-    fetch(`http://127.0.0.1:3006/link-preview?${queryString.stringify({ links })}`)
-    .then((resp)=>{return resp.json()})
-    .then((data) => {
-      console.log("links data = ", data)
-    })
-
-    this.props.links.forEach((link) => {
-      rowData.push({ ...link, id: rowData.length.toString() })
-    })
-
-    console.log("here")
-    console.log("rowData = ", rowData)
+    this.props.links.forEach((linkObject) => { links.push(linkObject.link) })
 
     return (
       <div>
@@ -187,66 +173,63 @@ class LinkTable extends React.Component<{
             }
           ]}
           render={({ rows, headers, getHeaderProps }) => {
+            const tableRows =
+            // TODO: use class css style instead of inline
+            this.props.previewData.map(e => {
+              const imageCellContent = 'images' in e && e.images.length > 0 ?
+                  <img src={e.images[0]} style={{
+                    width: 400,
+                    height: 300
+                  }}></img> : 
+                  null
 
-            let links = rows.map(row => {
-              const linkCell = row.cells.find(cell => {
-                return cell.info.header === LinkAttributes.link
-              })
-              //@ts-ignore
-              return linkCell.value
+              const titleCellContent = 'title' in e ?
+                e.title : 
+                null
+
+              const descriptionCellContent = 'description' in e ?
+                e.description : 
+                null
+
+              return (
+                <TableRow>
+                  <TableCell>
+                    {imageCellContent}
+                  </TableCell>
+                  <TableCell>{titleCellContent}</TableCell>
+                  <TableCell>{descriptionCellContent}</TableCell>
+                  <TableCell>{descriptionCellContent}</TableCell>
+
+                  {/* <TableCell><div
+                    className="clickableicon"
+                    onClick={
+                      (e) => this.props.deleteLinkHander(e, row.pk, this.props.linkListPk)
+                    }
+                  >
+                    <TrashCan20 />
+                  </div></TableCell> */}
+                </TableRow>
+              )
             })
 
-
-            links = ["https://tesla.com", "https://twitch.com"]
-            console.log("links = ", links)
-            const qStr = queryString.stringify({ links })
-            console.log("qStr = ", qStr)
-
             return (
-                  <TableContainer title={this.props.selectedLinkList?.title}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          {headers.map((header) => (
-                            <TableHeader {...getHeaderProps({ header })}>
-                              {header.header}
-                            </TableHeader>
-                          ))}
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
+              <TableContainer title={this.props.selectedLinkList?.title}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      {headers.map((header) => (
+                        <TableHeader {...getHeaderProps({ header })}>
+                          {header.header}
+                        </TableHeader>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {tableRows}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             )
-              // .then(data => {
-              //   console.log("data = ", data)
-              //   return (<h1>hi</h1>)
-                // const tableCells = data.map(d => {
-                //   console.log("d = ", d)
-                //   return (
-                //     <TableCell>hellooo</TableCell>
-                //   )
-                // })
-                // return (
-                //   <TableContainer title={this.props.selectedLinkList?.title}>
-                //     <Table>
-                //       <TableHead>
-                //         <TableRow>
-                //           {headers.map((header) => (
-                //             <TableHeader {...getHeaderProps({ header })}>
-                //               {header.header}
-                //             </TableHeader>
-                //           ))}
-                //         </TableRow>
-                //       </TableHead>
-                //       <TableBody>
-                //       </TableBody>
-                //     </Table>
-                //   </TableContainer>
-                // )
-              // })
-
           }}
         />
 
@@ -389,7 +372,9 @@ class App extends React.Component<
     newLinkList?: LinkListType
     user: string
     password: string
-    loginAttempt: boolean
+    loginAttempt: boolean,
+
+    previewData: LinkPreviewData[]
   }
   > {
   constructor(props: any) {
@@ -401,16 +386,29 @@ class App extends React.Component<
       linkLists: [],
       user: '',
       password: '',
-      loginAttempt: false
+      loginAttempt: false,
+
+      previewData: []
     }
   }
 
-  // TODO: getListFromDB is a misleading name as it sets the state and deosnt return anything!
+  // TODO: getListFromDB is a misleading name as it sets the state and doesn't return anything!
   private getListFromDB = (linkListPk: number) => {
     if (linkListPk && linkListPk > 0) {
       fetch(`http://127.0.0.1:8000/linklist/${linkListPk}/`)
         .then((r) => r.json())
         .then((data) => {
+          const links: string[] = []
+          data.forEach((linkObject: LinkType) => { links.push(linkObject.link) })
+
+          fetch(`http://127.0.0.1:3006/link-preview?${queryString.stringify({ links })}`)
+            .then((resp) => { return resp.json() })
+            .then((data) => {
+              this.setState({
+                previewData: data
+              })
+            })
+
           this.setState({
             links: data
           })
@@ -669,6 +667,8 @@ class App extends React.Component<
                 linkListPk={linkListPk}
                 selectedLinkList={this.state.selectedLinkList as LinkListType} // Should not be undefined after login handler
                 links={this.state.links}
+
+                previewData={this.state.previewData}
               ></LinkTable>
             </Content>
           </div>
