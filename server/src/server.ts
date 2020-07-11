@@ -5,7 +5,9 @@
  */
 import express from 'express'
 import bodyParser from 'body-parser'
-import {getLinkPreview} from 'link-preview-js';
+import { getLinkPreview } from 'link-preview-js'
+import { PreviewData } from './previewDataType'
+
 const cors = require('cors')
 const app = express()
 
@@ -15,19 +17,18 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 app.get('/link-preview', (req, res) => {
+  if (Array.isArray(req.query.links)) {
+    const linkPromises: Promise<PreviewData>[] = (req.query.links as string[]).map(link => {
+      return getLinkPreview(link)
+    })
 
-  console.log("request received for req = ", req)
-
-  //@ts-ignore
-  const linkPromises = req.query.links.map(link => {
-    return getLinkPreview(link)
-  })
-
-  Promise.all(linkPromises)
-  .then(data => {
-    console.log("resulting data to return = ", data)
-    res.send(data)
-  })
+    Promise.all(linkPromises)
+    .then(data => {
+      res.send(data)
+    })
+  } else {
+    res.send([])
+  }
 })
 
 app.listen(3006, () => {
