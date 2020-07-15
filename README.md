@@ -6,12 +6,12 @@ Frontend TODOs:
  - [ ] create, name, delete lists
  - [ ] create a sharable link for each list
  - [ ] link preview using og-*
+    - [ ] if no preview image exists, use a favicon
+    - [ ] fix link delete button
+    - [ ] add date_added to link table
  - [ ] actual login
  - [ ] routing
  - [ ] cool logo
- - [ ] if no preview image exists, use a favicon
- - [ ] fix link delete button
- - [ ] add date_added to link table
 
  Stretch goals
  - [ ] hover over tint delete link button
@@ -30,6 +30,7 @@ MVP:
  - [ ] Profit???
  - [ ] Invest $$ into TSLA stock
  - [ ] Buy a Roadster??
+ - [ ] Make naming consistent (ListLists vs LinkListList)
 
 thats it! keep it simple
 
