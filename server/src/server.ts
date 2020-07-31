@@ -17,8 +17,13 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 app.get('/link-preview', (req, res) => {
-  if (Array.isArray(req.query.links)) {
-    const linkPromises: Promise<PreviewData>[] = (req.query.links as string[]).map(link => {
+  const myArray : string[] | undefined = Array.isArray(req.query.links) ? 
+    req.query.links as string[] : 
+    typeof req.query.links === "string" ? 
+      [req.query.links as string] : 
+      undefined
+  if (myArray) {
+    const linkPromises: Promise<PreviewData>[] = myArray.map(link => {
       return getLinkPreview(link)
     })
 
@@ -27,7 +32,7 @@ app.get('/link-preview', (req, res) => {
       res.send(data)
     })
   } else {
-    res.send([])
+    res.status(400).send([])
   }
 })
 
